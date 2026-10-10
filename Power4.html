@@ -1,0 +1,3110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<!-- ═══ PWA / FULLSCREEN META ═══ -->
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JakarPOS">
+<meta name="application-name" content="JakarPOS">
+<meta name="msapplication-TileColor" content="#0f172a">
+<meta name="format-detection" content="telephone=no">
+
+<title>JakarPOS • Protocol Terminal v21 PRO</title>
+<style>
+:root{
+  --primary:#059669;--primary-dark:#047857;--primary-light:#10b981;--danger:#dc2626;--warn:#d97706;
+  --bg:#f1f5f9;--card:#ffffff;--text:#0f172a;--muted:#64748b;--border:#cbd5e1;
+  --info:#0369a1;--violet:#7c3aed;--gold:#f59e0b;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06);--shadow-md:0 4px 12px rgba(0,0,0,.08);
+  --shadow-lg:0 20px 30px rgba(0,0,0,.12);--shadow-xl:0 25px 50px -12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{height:100%;height:100dvh;overflow:hidden;background:#0f172a;overscroll-behavior:none;
+  position:fixed;width:100%;top:0;left:0;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+  padding-left:env(safe-area-inset-left);
+  padding-right:env(safe-area-inset-right)}
+body{display:flex;justify-content:center;align-items:center;touch-action:manipulation}
+.mobile-container{width:100%;height:100svh;max-width:480px;background:var(--bg);display:flex;flex-direction:column;
+  position:relative;overflow:hidden}
+@media(min-width:500px){.mobile-container{height:96svh;max-height:920px;border-radius:26px;box-shadow:var(--shadow-xl)}}
+
+.header{padding:11px 16px;background:#fff;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:600;color:var(--muted);
+  cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0;position:relative;min-height:42px;transition:background .15s}
+.header:active{background:#f8fafc}
+.header .hdr-right{margin-left:auto;font-size:10px;font-weight:800;color:var(--primary);letter-spacing:.5px;
+  padding:5px 10px;border-radius:14px;background:#ecfdf5;border:1px solid #a7f3d0;transition:all .15s}
+.header .hdr-right:active{background:#d1fae5;transform:scale(.96)}
+.header .hdr-right.clickable{cursor:pointer}
+
+.content{flex:1;padding:10px 14px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.content.scrollable{overflow-y:auto;-webkit-overflow-scrolling:touch;display:block;padding-bottom:20px}
+.content.scrollable::-webkit-scrollbar{width:0}
+.screen-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:8px;flex-shrink:0;letter-spacing:.2px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.screen-title .sub{font-size:9.5px;font-weight:600;color:var(--muted);letter-spacing:.4px;text-transform:uppercase}
+.screen-title .sub.clickable{cursor:pointer;padding:4px 10px;border-radius:12px;background:#ecfdf5;color:var(--primary);
+  font-weight:900;border:1px solid #a7f3d0;transition:all .15s;letter-spacing:.5px}
+.screen-title .sub.clickable:active{background:#d1fae5;transform:scale(.96)}
+.label-tag{font-size:9px;font-weight:800;letter-spacing:.6px;color:var(--muted);text-transform:uppercase;margin-bottom:3px;display:block}
+.form-group{margin-bottom:8px;flex-shrink:0}
+.row{display:flex;gap:8px}.col{flex:1}
+.input-box{width:100%;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 10px;font-size:14px;
+  font-weight:600;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;caret-color:transparent}
+.input-box:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(5,150,105,.15)}
+.input-box.masked-display{letter-spacing:3px;font-size:16px}
+.input-box.editable{caret-color:auto;user-select:text;-webkit-user-select:text}
+.input-card-no{font-family:'SF Mono','Courier New',monospace;font-size:17px;font-weight:800;letter-spacing:1.5px;
+  padding:12px 12px;text-align:center;color:#0f172a;background:#fafbfc}
+
+.amount-input-wrapper{display:flex;background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.amount-input-wrapper:focus-within{border-color:var(--primary);box-shadow:0 0 0 2px rgba(5,150,105,.15)}
+.amount-currency{padding:9px 10px;background:#f8fafc;border-right:1.5px solid var(--border);font-weight:800;color:var(--text);
+  font-size:13px;cursor:pointer;display:flex;align-items:center;gap:4px}
+.amount-field{border:none;width:100%;padding:9px 10px;font-size:15px;font-weight:800;outline:none;background:transparent;caret-color:transparent}
+
+.card-product-badge{margin-top:8px;padding:10px 12px;border-radius:10px;display:none;align-items:center;gap:10px;
+  background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;position:relative;overflow:hidden;
+  box-shadow:0 4px 14px rgba(15,23,42,.25)}
+.card-product-badge::before{content:"";position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;
+  background:rgba(255,255,255,.06)}
+.card-product-badge.show{display:flex}
+.card-product-logo{font-weight:900;font-style:italic;font-size:14px;letter-spacing:.5px;padding:4px 10px;border-radius:5px;
+  flex-shrink:0;position:relative;z-index:1;background:#1a1f71}
+.card-product-info{flex:1;min-width:0;position:relative;z-index:1}
+.card-product-name{font-size:11px;font-weight:900;letter-spacing:.7px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-product-tier{font-size:8.5px;font-weight:700;letter-spacing:.5px;opacity:.75;margin-top:2px;text-transform:uppercase}
+.card-product-chip{width:22px;height:22px;border-radius:5px;background:linear-gradient(135deg,#fbbf24,#d97706);flex-shrink:0;
+  position:relative;z-index:1;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.card-product-chip::before,.card-product-chip::after{content:"";position:absolute;background:rgba(0,0,0,.15)}
+.card-product-chip::before{left:50%;top:3px;bottom:3px;width:1px}
+.card-product-chip::after{top:50%;left:3px;right:3px;height:1px}
+
+.btn{width:100%;padding:12px;border:none;border-radius:9px;font-size:12.5px;font-weight:800;letter-spacing:.5px;cursor:pointer;
+  text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;flex-shrink:0;
+  transition:transform .1s,background .15s,box-shadow .15s;position:relative;overflow:hidden}
+.btn::after{content:"";position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.4) 0%,transparent 70%);
+  opacity:0;transition:opacity .3s;pointer-events:none}
+.btn:active::after{opacity:1;transition:opacity 0s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:linear-gradient(135deg,#059669 0%,#047857 100%);color:#fff;box-shadow:0 4px 12px rgba(5,150,105,.28)}
+.btn-primary:active{background:linear-gradient(135deg,#047857 0%,#065f46 100%)}
+.btn-primary:disabled{background:#94a3b8;box-shadow:none;cursor:not-allowed}
+.btn-secondary{background:#fff;color:var(--text);border:1.5px solid var(--border)}
+.btn-secondary:active{background:#f1f5f9}
+.btn-danger{background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca}
+.btn-danger:active{background:#fee2e2}
+.btn-warn{background:#fffbeb;color:#b45309;border:1.5px solid #fde68a}
+.btn-info{background:#eff6ff;color:#0369a1;border:1.5px solid #bfdbfe}
+.btn-dark{background:#0f172a;color:#fff}
+.btn-row{display:flex;gap:6px;margin-top:6px}
+.btn-row .btn{margin-top:0;flex:1;width:auto;min-width:0}
+.pay-btn{background:linear-gradient(135deg,#059669 0%,#0369a1 100%);color:#fff;font-size:14px;padding:14px;font-weight:900;
+  letter-spacing:1px;box-shadow:0 6px 18px rgba(5,150,105,.35);margin-top:8px}
+.pay-btn:active{background:linear-gradient(135deg,#047857 0%,#0c4a6e 100%);transform:scale(.98)}
+
+.crypto-god-btn{background:linear-gradient(135deg,#7c3aed 0%,#f59e0b 100%);color:#fff;font-size:12px;padding:14px;
+  font-weight:900;letter-spacing:1px;box-shadow:0 6px 18px rgba(124,58,237,.4);margin-top:8px;position:relative}
+.crypto-god-btn::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,transparent 0%,rgba(255,255,255,.15) 50%,transparent 100%);
+  background-size:200% 200%;animation:cryptoShine 2.5s infinite}
+@keyframes cryptoShine{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.spinner{display:none;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.3);border-radius:50%;
+  border-top-color:#fff;animation:spin .8s linear infinite}
+.spinner.dark{border-color:rgba(5,150,105,.2);border-top-color:var(--primary)}
+.spinner.show{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.home-top{background:linear-gradient(135deg,#059669 0%,#0369a1 100%);color:#fff;padding:16px 16px 18px;flex-shrink:0;position:relative;overflow:hidden}
+.home-top::after{content:"";position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;
+  background:rgba(255,255,255,.06)}
+.home-top::before{content:"";position:absolute;bottom:-60px;left:-30px;width:120px;height:120px;border-radius:50%;
+  background:rgba(255,255,255,.04)}
+.home-brand{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1}
+.home-brand-name{font-size:16px;font-weight:900;letter-spacing:.4px}
+.home-brand-tag{font-size:8.5px;opacity:.85;letter-spacing:1.2px;margin-top:2px;font-weight:700}
+.home-status{text-align:right}
+.home-status-label{font-size:8.5px;opacity:.8;letter-spacing:1px;font-weight:700}
+.home-status-val{font-size:10.5px;font-weight:900;margin-top:2px}
+.home-vol-label{font-size:8.5px;letter-spacing:1.2px;opacity:.85;margin-top:16px;font-weight:800}
+.home-vol-value{font-size:26px;font-weight:900;letter-spacing:.5px;margin-top:2px;font-variant-numeric:tabular-nums}
+.home-vol-meta{display:flex;gap:10px;margin-top:6px;font-size:9.5px;opacity:.92;flex-wrap:wrap;font-weight:700}
+.home-meta-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:3px;vertical-align:middle;
+  box-shadow:0 0 6px currentColor}
+
+.tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding-bottom:8px}
+.tile{background:#fff;border:1.5px solid #e2e8f0;border-radius:13px;padding:12px 11px;cursor:pointer;
+  transition:transform .12s,box-shadow .12s,background .15s;position:relative;overflow:hidden}
+.tile::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(5,150,105,.04),transparent);opacity:0;transition:opacity .2s}
+.tile:active{transform:scale(.97);background:#f8fafc}
+.tile:active::before{opacity:1}
+.tile-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:16px;margin-bottom:8px}
+.tile-title{font-size:12px;font-weight:800;color:var(--text);line-height:1.2}
+.tile-sub{font-size:9px;color:var(--muted);margin-top:4px;line-height:1.3;font-weight:600}
+
+.info-box{background:#fff;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);margin-bottom:9px;font-size:12px}
+.info-box .rcpt-row{margin-bottom:3px}
+.info-box .rcpt-row span:first-child{color:var(--muted);font-weight:600;font-size:10.5px}
+.info-box .rcpt-row span:last-child{font-weight:800;font-size:11px;text-align:right}
+.mono{font-family:'SF Mono','Courier New',monospace;font-size:10.5px;letter-spacing:.2px}
+
+.thermal-receipt{background:#fefefe;color:#1e293b;font-family:'Courier New',Courier,monospace;font-size:10.5px;line-height:1.35;
+  padding:14px 12px;margin:0 auto 8px;border-radius:4px;position:relative;box-shadow:var(--shadow-md);
+  border:1px solid #e2e8f0;flex:1;overflow-y:auto;min-height:0}
+.thermal-receipt::-webkit-scrollbar{width:0}
+.thermal-receipt::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:repeating-linear-gradient(90deg,transparent,transparent 4px,#e2e8f0 4px,#e2e8f0 8px)}
+.rcpt-center{text-align:center}
+.rcpt-title{font-size:13px;font-weight:800;letter-spacing:1px;margin-bottom:2px}
+.rcpt-subtitle{font-size:9px;color:#475569;margin-bottom:6px}
+.rcpt-row{display:flex;justify-content:space-between;margin-bottom:2px;gap:6px}
+.rcpt-bold{font-weight:700}
+.rcpt-divider{border-top:1px dashed #94a3b8;margin:6px 0}
+.rcpt-amount-box{text-align:center;padding:6px 0;margin:3px 0}
+.rcpt-amount-big{font-size:16px;font-weight:900;letter-spacing:.5px}
+.rcpt-badge{text-align:center;font-weight:800;font-size:11px;letter-spacing:1px;padding:5px 0;margin:3px 0;border:1px solid #cbd5e1;color:var(--text)}
+.rcpt-badge.declined{border-color:#ef4444;color:#ef4444;background:#fef2f2}
+.rcpt-badge.failed{border-color:#f59e0b;color:#b45309;background:#fffbeb}
+.rcpt-small-footer{font-size:9px;text-align:center;color:#64748b;margin-top:6px;line-height:1.3}
+.qr-block{margin:8px auto 4px;width:110px;height:110px;background:#fff;border:1px solid #e2e8f0;padding:6px;border-radius:4px}
+
+.view-screen{display:none;height:100%;flex-direction:column;min-height:0}
+.view-screen.active{display:flex}
+
+.read-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;gap:14px}
+.read-anim{width:130px;height:130px;border-radius:50%;background:radial-gradient(circle at 50% 50%,rgba(5,150,105,.15),transparent 70%);
+  display:flex;align-items:center;justify-content:center;position:relative}
+.read-anim::before{content:"";position:absolute;inset:0;border:2px solid var(--primary);border-radius:50%;opacity:0;
+  animation:pulse 1.6s ease-out infinite}
+.read-anim::after{content:"";position:absolute;inset:14px;border:1.5px dashed rgba(5,150,105,.4);border-radius:50%;
+  animation:spin 8s linear infinite}
+@keyframes pulse{0%{opacity:.8;transform:scale(.85)}100%{opacity:0;transform:scale(1.4)}}
+.read-icon{font-size:52px;z-index:1}
+.read-msg{font-size:13px;font-weight:800;color:var(--text);text-align:center;letter-spacing:.3px}
+.read-sub{font-size:10.5px;color:var(--muted);text-align:center;line-height:1.5;max-width:280px;font-weight:600}
+.read-progress{width:200px;height:4px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin-top:6px}
+.read-progress-bar{height:100%;background:var(--primary);width:0%;transition:width .4s ease}
+
+.approval-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-shrink:0}
+.approval-title{font-size:14px;font-weight:800;color:var(--text);letter-spacing:.2px}
+.step-indicator{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:12px;
+  background:#ecfdf5;border:1px solid #a7f3d0;font-size:9px;font-weight:900;color:var(--primary);letter-spacing:.5px}
+.step-indicator.step2{background:#fef3c7;border-color:#fbbf24;color:#b45309;animation:stepPulse 1.5s infinite}
+@keyframes stepPulse{0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,.5)}50%{box-shadow:0 0 0 6px rgba(251,191,36,0)}}
+
+.verify-warning{background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px solid #fbbf24;border-radius:10px;
+  padding:10px 12px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start;animation:warningGlow 2s ease-in-out infinite}
+@keyframes warningGlow{0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0)}50%{box-shadow:0 0 0 4px rgba(251,191,36,.15)}}
+.verify-warning-icon{font-size:20px;flex-shrink:0;line-height:1}
+.verify-warning-text{font-size:10.5px;font-weight:700;color:#92400e;line-height:1.45}
+.verify-warning-text b{color:#b45309;font-weight:900}
+.verify-warning-text .hi{color:#dc2626;font-weight:900}
+
+.pin-display{display:flex;gap:10px;justify-content:center;margin:16px 0 20px}
+.pin-dot{width:16px;height:16px;border-radius:50%;background:#e2e8f0;border:2px solid #cbd5e1;transition:all .15s}
+.pin-dot.filled{background:var(--primary);border-color:var(--primary);transform:scale(1.1);box-shadow:0 0 10px rgba(5,150,105,.5)}
+.pin-dot.filled.warn{background:#f59e0b;border-color:#f59e0b;box-shadow:0 0 10px rgba(245,158,11,.6)}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:0 auto;width:100%}
+.pin-key{background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 0;font-size:22px;font-weight:800;
+  color:var(--text);cursor:pointer;text-align:center;transition:background .1s,transform .1s}
+.pin-key:active{background:#f1f5f9;transform:scale(.96)}
+.pin-key.wide{font-size:13px;font-weight:900;color:var(--primary-dark);letter-spacing:.5px}
+.pin-key.wide.step2{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+
+.proc-stage-container{flex:1;display:flex;flex-direction:column;min-height:0;position:relative;overflow:hidden}
+.proc-hero{position:relative;padding:18px 16px 8px;background:linear-gradient(135deg,#0b1220 0%,#1e293b 100%);
+  border-radius:14px 14px 0 0;color:#fff;overflow:hidden;flex-shrink:0}
+.proc-hero::before{content:"";position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(circle,rgba(5,150,105,.15) 0%,transparent 45%);animation:proc-glow 3s ease-in-out infinite}
+@keyframes proc-glow{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+.proc-hero-row{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;margin-bottom:12px}
+.proc-brand{font-size:10px;font-weight:900;letter-spacing:2px;color:#5eead4}
+.proc-timer{font-size:11px;font-weight:900;color:#fbbf24;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.proc-amount{font-size:30px;font-weight:900;letter-spacing:.5px;position:relative;z-index:1;font-variant-numeric:tabular-nums;
+  background:linear-gradient(135deg,#fff 0%,#94e2d5 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.proc-amount-label{font-size:9px;letter-spacing:1.5px;color:#64748b;font-weight:800;margin-bottom:2px;position:relative;z-index:1}
+.proc-network{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 0;position:relative;z-index:1}
+.proc-node{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);border:1.5px solid rgba(94,234,213,.4);
+  display:flex;align-items:center;justify-content:center;font-size:14px;color:#5eead4;flex-shrink:0}
+.proc-node.active{background:rgba(16,185,129,.25);border-color:#10b981;box-shadow:0 0 16px rgba(16,185,129,.6);animation:node-pulse 1.2s infinite}
+@keyframes node-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.proc-link{flex:1;height:2px;background:rgba(148,163,184,.2);position:relative;max-width:60px;border-radius:2px;overflow:hidden}
+.proc-link::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,#10b981,transparent)}
+.proc-link.flow::before{animation:flow 1s linear infinite}
+@keyframes flow{to{left:100%}}
+.proc-link.done{background:#10b981}
+.proc-link.done::before{display:none}
+
+.proc-steps{padding:10px 16px 12px;background:#0b1220;flex-shrink:0}
+.proc-step{display:flex;align-items:center;gap:10px;padding:6px 0;opacity:.35;transition:opacity .3s}
+.proc-step.active{opacity:1}
+.proc-step.done{opacity:.7}
+.proc-step-icon{width:20px;height:20px;border-radius:50%;background:rgba(148,163,184,.15);border:1.5px solid rgba(148,163,184,.3);
+  display:flex;align-items:center;justify-content:center;font-size:10px;color:#94a3b8;flex-shrink:0;transition:all .3s;font-weight:900}
+.proc-step.active .proc-step-icon{background:rgba(251,191,36,.2);border-color:#fbbf24;color:#fbbf24;animation:node-pulse 1s infinite}
+.proc-step.done .proc-step-icon{background:#10b981;border-color:#10b981;color:#fff}
+.proc-step-body{flex:1;min-width:0}
+.proc-step-name{font-size:11px;font-weight:800;color:#cbd5e1;letter-spacing:.3px}
+.proc-step-detail{font-size:9px;color:#64748b;font-weight:700;margin-top:1px;font-family:'SF Mono',monospace;letter-spacing:.2px}
+.proc-step.active .proc-step-name{color:#fbbf24}
+.proc-step.active .proc-step-detail{color:#fcd34d}
+.proc-step.done .proc-step-name{color:#5eead4}
+.proc-step-check{margin-left:auto;font-size:11px;color:#10b981;font-weight:900;opacity:0;transition:opacity .3s}
+.proc-step.done .proc-step-check{opacity:1}
+
+.proc-progress{height:4px;background:#1e293b;position:relative;overflow:hidden;flex-shrink:0}
+.proc-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#10b981,#5eead4,#fbbf24);
+  transition:width .35s ease;position:relative;box-shadow:0 0 12px rgba(16,185,129,.7)}
+.proc-progress-bar::after{content:"";position:absolute;top:0;right:0;width:30px;height:100%;
+  background:linear-gradient(90deg,transparent,#fff);opacity:.5;animation:shimmer 1.2s infinite}
+@keyframes shimmer{0%,100%{opacity:.2}50%{opacity:.7}}
+
+.proc-sublog{flex:1;background:#0b1220;color:#94e2d5;font-family:'SF Mono','Courier New',monospace;font-size:9.5px;line-height:1.55;
+  padding:10px 14px;overflow-y:auto;min-height:0;border-top:1px solid #1e293b}
+.proc-sublog::-webkit-scrollbar{width:0}
+.proc-sublog .req{color:#7dd3fc}
+.proc-sublog .res{color:#86efac}
+.proc-sublog .err{color:#fca5a5}
+.proc-sublog .warn{color:#fcd34d}
+.proc-sublog .dim{color:#64748b}
+.proc-sublog .line{margin-bottom:1px;white-space:pre-wrap;word-break:break-all}
+
+.crypto-theme{background:linear-gradient(160deg,#1e1b4b 0%,#4c1d95 50%,#7c2d12 100%)!important}
+.crypto-proc-hero{background:linear-gradient(135deg,#1e1b4b 0%,#4c1d95 100%)!important}
+.crypto-proc-hero::before{background:radial-gradient(circle,rgba(245,158,11,.18) 0%,transparent 45%)!important}
+.crypto-proc-brand{color:#fbbf24!important}
+.crypto-proc-amount{background:linear-gradient(135deg,#fff 0%,#fbbf24 100%)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text!important}
+.crypto-proc-node{color:#fbbf24!important;border-color:rgba(251,191,36,.4)!important}
+.crypto-proc-node.active{background:rgba(245,158,11,.25)!important;border-color:#f59e0b!important;box-shadow:0 0 16px rgba(245,158,11,.6)!important}
+.crypto-proc-link::before{background:linear-gradient(90deg,transparent,#f59e0b,transparent)!important}
+.crypto-proc-link.done{background:#f59e0b!important}
+.crypto-proc-step.active .proc-step-icon{background:rgba(251,191,36,.2)!important;border-color:#fbbf24!important;color:#fbbf24!important}
+.crypto-proc-step.done .proc-step-icon{background:#f59e0b!important;border-color:#f59e0b!important}
+.crypto-proc-step.active .proc-step-name{color:#fbbf24!important}
+.crypto-proc-step.active .proc-step-detail{color:#fcd34d!important}
+.crypto-proc-step.done .proc-step-name{color:#fbbf24!important}
+.crypto-proc-progress-bar{background:linear-gradient(90deg,#7c3aed,#f59e0b,#fbbf24)!important;box-shadow:0 0 12px rgba(245,158,11,.7)!important}
+
+#screen-success{background:linear-gradient(160deg,#064e3b 0%,#022c22 50%,#0f172a 100%);position:relative;overflow:hidden}
+.success-confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.confetti-piece{position:absolute;width:8px;height:8px;top:-20px;opacity:0;animation:confetti-fall linear forwards}
+@keyframes confetti-fall{
+  0%{transform:translateY(-20px) rotate(0deg);opacity:1}
+  100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+}
+.success-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;position:relative;z-index:2;overflow:hidden}
+.success-check-wrap{position:relative;width:130px;height:130px;margin-bottom:6px;display:flex;align-items:center;justify-content:center}
+.success-check-ring{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(16,185,129,.3);animation:ring-grow 1s ease-out}
+.success-check-ring.r2{animation-delay:.2s;border-color:rgba(16,185,129,.15)}
+.success-check-ring.r3{animation-delay:.4s;border-color:rgba(16,185,129,.08)}
+@keyframes ring-grow{0%{transform:scale(.5);opacity:0}100%{transform:scale(1.25);opacity:0}}
+.success-check{width:96px;height:96px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#10b981,#047857);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(16,185,129,.6),inset 0 -8px 20px rgba(0,0,0,.2);
+  animation:check-pop .6s cubic-bezier(.2,1.4,.4,1) forwards;position:relative;z-index:1}
+.success-check svg{width:52px;height:52px}
+.success-check path{stroke:#fff;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;fill:none;
+  stroke-dasharray:60;stroke-dashoffset:60;animation:draw-check .55s .35s ease-out forwards}
+@keyframes check-pop{0%{transform:scale(0) rotate(-45deg);opacity:0}60%{transform:scale(1.15) rotate(3deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes draw-check{to{stroke-dashoffset:0}}
+.success-icon.declined{background:radial-gradient(circle at 40% 35%,#ef4444,#991b1b);box-shadow:0 0 40px rgba(239,68,68,.6),inset 0 -8px 20px rgba(0,0,0,.2)}
+.success-icon.failed{background:radial-gradient(circle at 40% 35%,#f59e0b,#92400e);box-shadow:0 0 40px rgba(245,158,11,.6),inset 0 -8px 20px rgba(0,0,0,.2)}
+.success-icon.info{background:radial-gradient(circle at 40% 35%,#3b82f6,#1e40af)}
+
+.success-title{font-size:20px;font-weight:900;color:#fff;letter-spacing:.5px;text-align:center;margin-bottom:4px;
+  animation:fade-up .5s .35s both}
+.success-subtitle{font-size:11px;color:#94e2d5;font-weight:700;letter-spacing:1.5px;text-align:center;margin-bottom:14px;
+  animation:fade-up .5s .45s both;text-transform:uppercase}
+.success-subtitle.declined{color:#fca5a5}
+.success-subtitle.failed{color:#fcd34d}
+@keyframes fade-up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.success-amount-card{background:rgba(255,255,255,.06);border:1px solid rgba(94,234,213,.25);border-radius:14px;
+  padding:12px 20px;backdrop-filter:blur(8px);text-align:center;min-width:200px;animation:fade-up .5s .55s both;
+  box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.success-amount-label{font-size:9px;letter-spacing:1.5px;color:#5eead4;font-weight:800;text-transform:uppercase}
+.success-amount{font-size:28px;font-weight:900;color:#fff;font-variant-numeric:tabular-nums;margin-top:2px;
+  background:linear-gradient(135deg,#fff 0%,#5eead4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.success-details{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 16px 8px;position:relative;z-index:2;width:100%;
+  animation:fade-up .5s .65s both}
+.success-detail{background:rgba(255,255,255,.05);border:1px solid rgba(148,163,184,.15);border-radius:9px;padding:7px 10px}
+.success-detail-label{font-size:8px;letter-spacing:.8px;color:#64748b;font-weight:800;text-transform:uppercase}
+.success-detail-value{font-size:11px;font-weight:800;color:#e2e8f0;margin-top:2px;font-variant-numeric:tabular-nums;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.success-detail-value.mono{font-family:'SF Mono','Courier New',monospace;font-size:10px}
+
+.success-actions{padding:8px 16px 12px;display:flex;flex-direction:column;gap:6px;position:relative;z-index:2;animation:fade-up .5s .8s both}
+.success-actions .btn{margin:0;width:100%}
+.success-actions-row{display:flex;gap:8px}
+.success-actions-row .btn{margin:0;flex:1;width:auto;min-width:0}
+
+.chip-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:7px;flex-shrink:0;scrollbar-width:none}
+.chip-row::-webkit-scrollbar{display:none}
+.chip{padding:6px 12px;border-radius:20px;background:#fff;border:1.5px solid var(--border);font-size:10.5px;font-weight:800;
+  color:var(--muted);white-space:nowrap;cursor:pointer;flex-shrink:0;transition:all .15s}
+.chip.active{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(5,150,105,.3)}
+
+.hist-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;padding-bottom:8px}
+.hist-item{background:#fff;border:1px solid #e2e8f0;border-radius:11px;padding:10px;margin-bottom:7px;display:flex;gap:9px;
+  align-items:center;cursor:pointer;transition:background .12s,transform .12s,box-shadow .12s}
+.hist-item:active{background:#f8fafc;transform:scale(.99)}
+.hist-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;font-weight:900}
+.hist-main{flex:1;min-width:0}
+.hist-title{font-size:11.5px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-sub{font-size:9px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.hist-right{text-align:right;flex-shrink:0}
+.hist-amt{font-size:11.5px;font-weight:900;color:var(--text);font-variant-numeric:tabular-nums}
+.hist-status{font-size:8px;font-weight:900;letter-spacing:.4px;margin-top:3px}
+
+.empty-state{text-align:center;padding:34px 16px;font-size:11.5px;color:var(--muted);line-height:1.5;font-weight:600}
+
+.sheet-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);display:none;z-index:40;
+  animation:fade-in .2s ease}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+.sheet{position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;max-height:75%;display:flex;
+  flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.1,.9,.2,1);z-index:41;
+  box-shadow:0 -10px 30px rgba(0,0,0,.2)}
+.sheet.active{transform:translateY(0)}
+.sheet-header{padding:12px 16px;font-weight:800;border-bottom:1px solid #f1f5f9;font-size:11px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+.sheet-list{overflow-y:auto;padding:2px 0;flex:1}
+.sheet-list::-webkit-scrollbar{width:0}
+.sheet-item{padding:11px 16px;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;
+  cursor:pointer;color:var(--text);border-bottom:1px solid #f8fafc;transition:background .12s}
+.sheet-item:active{background:#f8fafc}
+.sheet-item .sub{font-size:10px;color:var(--muted);font-weight:600;margin-top:2px}
+
+.outcome-option{padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid #f8fafc;
+  transition:background .12s}
+.outcome-option:active{background:#f1f5f9}
+.outcome-option-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:900;flex-shrink:0}
+.outcome-option-icon.success{background:#dcfce7;color:#16a34a}
+.outcome-option-icon.declined{background:#fee2e2;color:#dc2626}
+.outcome-option-title{font-size:13px;font-weight:900;color:var(--text);letter-spacing:.3px}
+.outcome-option-sub{font-size:10px;color:var(--muted);font-weight:600;margin-top:2px}
+.outcome-check{margin-left:auto;font-size:16px;color:var(--primary);font-weight:900;opacity:0;transition:opacity .2s}
+.outcome-option.selected .outcome-check{opacity:1}
+
+.popup-dialog{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);width:86%;background:#fff;
+  border-radius:16px;padding:20px 18px;box-shadow:var(--shadow-xl);text-align:center;display:none;z-index:50}
+.popup-dialog.active{display:block;transform:translate(-50%,-50%) scale(1);animation:pop-in .25s cubic-bezier(.2,1.2,.4,1)}
+@keyframes pop-in{from{transform:translate(-50%,-50%) scale(.85);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.status-icon{width:48px;height:48px;border-radius:50%;background:#dcfce7;color:#16a34a;display:flex;align-items:center;
+  justify-content:center;font-size:24px;margin:0 auto 10px;font-weight:900}
+.status-icon.info{background:#e0f2fe;color:#0369a1}
+
+.toast{position:absolute;left:50%;bottom:80px;transform:translateX(-50%) translateY(10px);background:#0f172a;color:#fff;
+  font-size:11.5px;font-weight:700;padding:10px 16px;border-radius:20px;opacity:0;transition:all .25s;z-index:90;
+  pointer-events:none;max-width:84%;text-align:center;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.custom-keyboard{position:absolute;left:0;right:0;bottom:0;background:#e5e7eb;border-top:1px solid #cbd5e1;padding:6px;
+  display:none;z-index:30;flex-direction:column;gap:5px;box-shadow:0 -4px 12px rgba(0,0,0,.1)}
+.custom-keyboard.active{display:flex}
+.kb-row{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.kb-btn{background:#fff;border:1px solid #d1d5db;border-radius:8px;padding:12px 0;font-size:18px;font-weight:800;
+  color:var(--text);cursor:pointer;text-align:center;transition:background .1s}
+.kb-btn:active{background:#d1d5db}
+.kb-btn.action{background:#f3f4f6;font-size:13px;font-weight:800;color:var(--primary-dark)}
+.kb-btn.done{background:var(--primary);color:#fff;font-weight:800}
+
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px}
+.stat-card{background:#fff;border:1.5px solid var(--border);border-radius:11px;padding:10px 11px}
+.stat-label{font-size:8.5px;font-weight:800;letter-spacing:.5px;color:var(--muted);text-transform:uppercase}
+.stat-value{font-size:16px;font-weight:900;color:var(--text);margin-top:3px;font-variant-numeric:tabular-nums}
+.stat-sub{font-size:9px;color:var(--muted);font-weight:700;margin-top:2px}
+
+.setting-row{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:11px 12px;margin-bottom:7px;display:flex;
+  align-items:center;justify-content:space-between;gap:10px}
+.setting-title{font-size:12px;font-weight:800;color:var(--text)}
+.setting-sub{font-size:9.5px;color:var(--muted);margin-top:2px;line-height:1.35;font-weight:600}
+.switch{width:42px;height:24px;border-radius:12px;background:#cbd5e1;position:relative;transition:background .2s;
+  flex-shrink:0;cursor:pointer}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;
+  transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.switch.on{background:var(--primary)}
+.switch.on::after{transform:translateX(18px)}
+.pill-btn{border:1.5px solid var(--border);background:#f8fafc;border-radius:20px;padding:6px 12px;font-size:10px;
+  font-weight:900;color:var(--text);cursor:pointer;flex-shrink:0;letter-spacing:.4px}
+
+.asset-row{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:9px 11px;margin-bottom:6px;display:flex;
+  align-items:center;gap:9px}
+.asset-sym{width:34px;height:34px;border-radius:50%;background:#0f172a;color:#fff;display:flex;align-items:center;
+  justify-content:center;font-size:10px;font-weight:900;flex-shrink:0}
+.asset-info{flex:1;min-width:0}
+.asset-name{font-size:11.5px;font-weight:800;color:var(--text)}
+.asset-net{font-size:8.5px;color:var(--muted);margin-top:2px;letter-spacing:.4px;font-weight:700}
+.asset-right{text-align:right;flex-shrink:0}
+.asset-price{font-size:11.5px;font-weight:900;color:var(--text);font-variant-numeric:tabular-nums}
+.asset-chg{font-size:9px;font-weight:900;margin-top:2px}
+.up{color:#16a34a}.down{color:#ef4444}.flat{color:#64748b}
+
+.footer-note{padding:8px 16px;font-size:9px;color:#94a3b8;text-align:center;flex-shrink:0;font-weight:600;
+  border-top:1px solid #e2e8f0;background:#f8fafc}
+.footer-note strong{color:#64748b}
+
+.cg-received-section{background:linear-gradient(135deg,#7c3aed 0%,#4c1d95 100%);border-radius:14px;padding:16px 18px;
+  color:#fff;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(124,58,237,.35)}
+.cg-received-section::after{content:"";position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;
+  background:rgba(255,255,255,.08)}
+.cg-received-label{font-size:9px;font-weight:800;letter-spacing:1.5px;opacity:.85;text-transform:uppercase;position:relative;z-index:1}
+.cg-received-amount{font-size:28px;font-weight:900;letter-spacing:.5px;margin-top:4px;font-variant-numeric:tabular-nums;
+  position:relative;z-index:1;background:linear-gradient(135deg,#fff 0%,#fbbf24 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cg-received-meta{font-size:9px;font-weight:700;opacity:.75;margin-top:3px;letter-spacing:.3px;position:relative;z-index:1}
+
+.cg-received-row{display:flex;align-items:center;gap:14px;position:relative;z-index:1;margin-top:4px;flex-wrap:wrap}
+.cg-received-timer{
+  display:none;align-items:center;gap:7px;font-size:12px;font-weight:900;letter-spacing:.6px;
+  color:#fbbf24;background:rgba(0,0,0,.28);border:1.5px solid rgba(251,191,36,.55);
+  border-radius:20px;padding:5px 13px;font-variant-numeric:tabular-nums;white-space:nowrap;
+  box-shadow:0 0 14px rgba(251,191,36,.25);animation:cgTimerPulse 1.1s ease-in-out infinite;
+}
+.cg-received-timer.show{display:inline-flex}
+.cg-received-timer.done{
+  color:#86efac;border-color:rgba(134,239,172,.55);background:rgba(16,185,129,.22);
+  box-shadow:0 0 14px rgba(16,185,129,.3);animation:none;
+}
+@keyframes cgTimerPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:.82}}
+.cg-timer-dot{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;flex-shrink:0;
+  animation:cgDotBlink 1s ease-in-out infinite}
+.cg-received-timer.done .cg-timer-dot{animation:none}
+@keyframes cgDotBlink{0%,100%{opacity:1}50%{opacity:.25}}
+
+.cg-convert-panel{
+  display:none;margin-top:12px;position:relative;z-index:1;
+  background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.16);
+  border-radius:12px;padding:11px 13px;backdrop-filter:blur(4px);overflow:hidden;
+}
+.cg-convert-panel.show{display:block;animation:cgPanelIn .35s ease}
+@keyframes cgPanelIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.cg-convert-panel::before{
+  content:"";position:absolute;top:0;left:-60%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(251,191,36,.13),transparent);
+  animation:cgSweep 2.4s linear infinite;pointer-events:none;
+}
+@keyframes cgSweep{to{left:120%}}
+.cg-convert-panel.done::before{display:none}
+.cg-convert-head{display:flex;align-items:center;gap:8px;position:relative;z-index:1}
+.cg-convert-spinner{
+  width:13px;height:13px;border-radius:50%;flex-shrink:0;
+  border:2px solid rgba(255,255,255,.22);border-top-color:#fbbf24;
+  animation:spin .8s linear infinite;
+}
+.cg-convert-title{font-size:10.5px;font-weight:900;letter-spacing:.4px;color:#fff}
+.cg-convert-pct{margin-left:auto;font-size:10.5px;font-weight:900;color:#fbbf24;font-variant-numeric:tabular-nums}
+.cg-convert-sub{font-size:9.5px;font-weight:700;color:rgba(255,255,255,.72);margin-top:5px;line-height:1.45;position:relative;z-index:1}
+.cg-convert-bar{height:4px;background:rgba(255,255,255,.14);border-radius:4px;overflow:hidden;margin-top:9px;position:relative;z-index:1}
+.cg-convert-bar-fill{
+  height:100%;width:0%;border-radius:4px;position:relative;
+  background:linear-gradient(90deg,#7c3aed,#f59e0b,#fbbf24);
+  box-shadow:0 0 10px rgba(251,191,36,.65);transition:width .18s linear;
+}
+.cg-convert-bar-fill::after{
+  content:"";position:absolute;top:0;right:0;width:22px;height:100%;
+  background:linear-gradient(90deg,transparent,#fff);opacity:.55;animation:shimmer 1.1s infinite;
+}
+.cg-convert-steps{margin-top:9px;display:flex;flex-direction:column;gap:4px;position:relative;z-index:1}
+.cg-convert-step{
+  display:flex;align-items:center;gap:7px;font-size:9px;font-weight:800;letter-spacing:.25px;
+  color:rgba(255,255,255,.35);transition:color .3s;
+}
+.cg-convert-step .dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;transition:all .3s}
+.cg-convert-step.active{color:#fcd34d}
+.cg-convert-step.active .dot{box-shadow:0 0 8px currentColor;animation:cgDotBlink .9s infinite}
+.cg-convert-step.done{color:#86efac}
+.cg-convert-step.done .dot{box-shadow:0 0 6px currentColor}
+.cg-convert-done{display:none;position:relative;z-index:1}
+.cg-convert-panel.done .cg-convert-live{display:none}
+.cg-convert-panel.done .cg-convert-done{display:block}
+.cg-convert-done-row{display:flex;align-items:flex-start;gap:9px}
+.cg-convert-check{
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#10b981,#047857);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;
+  box-shadow:0 0 12px rgba(16,185,129,.55);
+}
+.cg-convert-done .cg-convert-sub{color:rgba(255,255,255,.8)}
+
+.cg-balance-chip{background:linear-gradient(135deg,#10b981 0%,#047857 100%);border-radius:12px;padding:12px 16px;
+  color:#fff;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  box-shadow:0 4px 14px rgba(5,150,105,.3);position:relative;overflow:hidden}
+.cg-balance-chip::after{content:"";position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;
+  background:rgba(255,255,255,.1)}
+.cg-balance-chip.left{position:relative;z-index:1}
+.cg-balance-label{font-size:9px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;opacity:.9}
+.cg-balance-value{font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;margin-top:2px;letter-spacing:.4px}
+.cg-balance-chip.low{background:linear-gradient(135deg,#ef4444 0%,#991b1b 100%);box-shadow:0 4px 14px rgba(239,68,68,.3)}
+.cg-balance-icon{font-size:28px;position:relative;z-index:1}
+
+.cg-host-title{display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);
+  border-radius:12px;color:#fff;margin-bottom:14px;box-shadow:0 6px 18px rgba(245,158,11,.3);position:relative;overflow:hidden}
+.cg-host-title::before{content:"";position:absolute;top:-20px;left:-20px;width:100px;height:100px;border-radius:50%;
+  background:rgba(255,255,255,.08)}
+.cg-host-icon{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;
+  justify-content:center;font-size:20px;flex-shrink:0;position:relative;z-index:1;border:1.5px solid rgba(255,255,255,.4)}
+.cg-host-name{font-size:12.5px;font-weight:900;letter-spacing:.8px;position:relative;z-index:1}
+.cg-host-sub{font-size:8.5px;font-weight:800;letter-spacing:1px;opacity:.85;margin-top:2px;position:relative;z-index:1;text-transform:uppercase}
+
+.cg-select{width:100%;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:11px 12px;font-size:13px;
+  font-weight:800;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;font-family:inherit}
+.cg-select:focus{border-color:#7c3aed;box-shadow:0 0 0 2px rgba(124,58,237,.15)}
+
+.cg-conversion-box{background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);border:1.5px solid #fbbf24;border-radius:12px;
+  padding:14px 16px;margin-bottom:12px;position:relative;overflow:hidden;box-shadow:0 4px 14px rgba(251,191,36,.2)}
+.cg-conversion-box::after{content:"";position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;
+  background:rgba(255,255,255,.4)}
+.cg-conv-label{font-size:9px;font-weight:900;letter-spacing:1.5px;color:#92400e;text-transform:uppercase;position:relative;z-index:1}
+.cg-conv-amount{font-size:22px;font-weight:900;color:#78350f;margin-top:5px;font-variant-numeric:tabular-nums;
+  letter-spacing:.3px;position:relative;z-index:1;word-break:break-all}
+.cg-conv-rate{font-size:9.5px;font-weight:800;color:#92400e;margin-top:5px;opacity:.85;position:relative;z-index:1;letter-spacing:.3px}
+
+.crypto-proceed-btn{background:linear-gradient(135deg,#7c3aed 0%,#f59e0b 100%);color:#fff;font-size:12.5px;padding:15px;
+  font-weight:900;letter-spacing:.8px;box-shadow:0 8px 22px rgba(124,58,237,.45);margin-top:10px;position:relative;overflow:hidden;
+  border-radius:10px}
+.crypto-proceed-btn::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,transparent 0%,rgba(255,255,255,.2) 50%,transparent 100%);
+  background-size:200% 200%;animation:cryptoShine 2.5s infinite;pointer-events:none}
+.crypto-proceed-btn:active{transform:scale(.97)}
+
+#screen-crypto-complete{background:linear-gradient(160deg,#1e1b4b 0%,#4c1d95 50%,#7c2d12 100%);position:relative;overflow:hidden}
+.crypto-complete-confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.crypto-complete-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;position:relative;z-index:2;overflow-y:auto}
+.crypto-complete-hero::-webkit-scrollbar{width:0}
+.crypto-check-wrap{position:relative;width:120px;height:120px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.crypto-check-ring{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(245,158,11,.3);animation:ring-grow 1s ease-out}
+.crypto-check-ring.r2{animation-delay:.2s;border-color:rgba(245,158,11,.15)}
+.crypto-check-ring.r3{animation-delay:.4s;border-color:rgba(245,158,11,.08)}
+.crypto-check{width:88px;height:88px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#f59e0b,#b45309);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(245,158,11,.65),inset 0 -8px 20px rgba(0,0,0,.2);
+  animation:check-pop .6s cubic-bezier(.2,1.4,.4,1) forwards;position:relative;z-index:1}
+.crypto-check svg{width:48px;height:48px}
+.crypto-check path{stroke:#fff;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;fill:none;
+  stroke-dasharray:60;stroke-dashoffset:60;animation:draw-check .55s .35s ease-out forwards}
+.crypto-complete-title{font-size:19px;font-weight:900;color:#fff;letter-spacing:.4px;text-align:center;margin-bottom:8px;
+  animation:fade-up .5s .35s both;line-height:1.25}
+.crypto-complete-title .accent{background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.crypto-complete-msg{font-size:11.5px;color:#cbd5e1;font-weight:600;line-height:1.6;text-align:center;margin-bottom:14px;
+  padding:0 4px;animation:fade-up .5s .45s both}
+.crypto-complete-msg b{color:#fbbf24;font-weight:900}
+.crypto-complete-msg .hi{color:#f59e0b;font-weight:900;letter-spacing:.3px}
+.crypto-complete-team{font-size:13px;font-weight:900;color:#fbbf24;letter-spacing:2px;text-align:center;margin-bottom:16px;
+  animation:fade-up .5s .55s both;text-transform:uppercase}
+
+.crypto-countdown-card{background:rgba(255,255,255,.06);border:1.5px solid rgba(251,191,36,.35);border-radius:16px;
+  padding:16px 20px;backdrop-filter:blur(10px);text-align:center;min-width:250px;animation:fade-up .5s .65s both;
+  box-shadow:0 12px 32px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.1);margin-bottom:14px}
+.crypto-countdown-label{font-size:9px;letter-spacing:2px;color:#fbbf24;font-weight:900;text-transform:uppercase;margin-bottom:8px}
+.crypto-countdown-time{font-size:34px;font-weight:900;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:2px;
+  background:linear-gradient(135deg,#fff 0%,#fbbf24 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;animation:countPulse 2s ease-in-out infinite}
+@keyframes countPulse{0%,100%{opacity:1}50%{opacity:.85}}
+.crypto-countdown-units{display:flex;justify-content:center;gap:14px;margin-top:8px;font-size:8px;font-weight:900;
+  letter-spacing:1.2px;color:#94a3b8;text-transform:uppercase}
+.crypto-countdown-units span{flex:1;text-align:center}
+
+.crypto-complete-actions{padding:8px 16px 16px;display:flex;gap:8px;position:relative;z-index:2;width:100%;
+  animation:fade-up .5s .8s both}
+.crypto-complete-actions .btn{margin:0;flex:1;width:auto;min-width:0}
+
+.crypto-summary{background:rgba(255,255,255,.05);border:1px solid rgba(148,163,184,.15);border-radius:10px;
+  padding:10px 12px;margin-bottom:12px;width:100%;max-width:320px;animation:fade-up .5s .72s both}
+.crypto-summary-row{display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:5px;gap:8px}
+.crypto-summary-row:last-child{margin-bottom:0}
+.crypto-summary-row span:first-child{color:#94a3b8;font-weight:700;letter-spacing:.3px}
+.crypto-summary-row span:last-child{color:#fff;font-weight:900;letter-spacing:.3px;text-align:right;word-break:break-all}
+.crypto-summary-row span.accent{color:#fbbf24}
+</style>
+</head>
+<body>
+<div class="mobile-container" id="app">
+
+<div id="screen-home" class="view-screen active">
+  <div class="home-top">
+    <div class="home-brand">
+      <div>
+        <div class="home-brand-name">JakarPOS</div>
+        <div class="home-brand-tag">PROTOCOL TERMINAL • v21 PRO</div>
+      </div>
+      <div class="home-status">
+        <div class="home-status-label">HOST</div>
+        <div class="home-status-val" id="home-host-status">● ONLINE</div>
+      </div>
+    </div>
+    <div class="home-vol-label">TODAY'S SETTLED VOLUME</div>
+    <div class="home-vol-value" id="home-volume">USD 0.00</div>
+    <div class="home-vol-meta">
+      <span><span class="home-meta-dot" style="background:#86efac;color:#86efac"></span><span id="home-approved">0</span> appr</span>
+      <span><span class="home-meta-dot" style="background:#fca5a5;color:#fca5a5"></span><span id="home-declined">0</span> decl</span>
+      <span><span class="home-meta-dot" style="background:#fcd34d;color:#fcd34d"></span><span id="home-failed">0</span> fail</span>
+      <span><span class="home-meta-dot" style="background:#93c5fd;color:#93c5fd"></span>Batch <span id="home-batch">000106</span></span>
+    </div>
+  </div>
+  <div class="content scrollable" style="padding-top:12px;">
+    <div class="tile-grid">
+      <div class="tile" onclick="playBeep();goTo('screen-sale')"><div class="tile-icon" style="background:#dcfce7;color:#16a34a;">💳</div><div class="tile-title">New Sale</div><div class="tile-sub">Purchase with EMV, contactless or manual key</div></div>
+      <div class="tile" onclick="playBeep();goTo('screen-refund')"><div class="tile-icon" style="background:#fee2e2;color:#dc2626;">↩️</div><div class="tile-title">Refund / Void</div><div class="tile-sub">Find a settled txn and reverse it</div></div>
+      <div class="tile" onclick="playBeep();goTo('screen-preauth')"><div class="tile-icon" style="background:#fef3c7;color:#b45309;">🔒</div><div class="tile-title">Pre-Authorization</div><div class="tile-sub">Hold funds for later completion</div></div>
+      <div class="tile" onclick="playBeep();goTo('screen-balance')"><div class="tile-icon" style="background:#e0e7ff;color:#4338ca;">🔍</div><div class="tile-title">Balance Inquiry</div><div class="tile-sub">Query card ledger balance</div></div>
+      <div class="tile" onclick="playBeep();goTo('screen-tip')"><div class="tile-icon" style="background:#fce7f3;color:#be185d;">💵</div><div class="tile-title">Tip Adjust</div><div class="tile-sub">Add gratuity to open ticket</div></div>
+      <div class="tile" onclick="playBeep();goTo('screen-history')"><div class="tile-icon" style="background:#dbeafe;color:#0369a1;">📋</div><div class="tile-title">History</div><div class="tile-sub">All approvals, declines &amp; failures</div></div>
+      <div class="tile" onclick="playBeep();goTo('screen-batch')"><div class="tile-icon" style="background:#cffafe;color:#0e7490;">📦</div><div class="tile-title">Batch &amp; Settle</div><div class="tile-sub">Close batch, settle host</div></div>
+      <div class="tile" onclick="playBeep();goTo('screen-crypto')"><div class="tile-icon" style="background:#f3e8ff;color:#7c3aed;">₿</div><div class="tile-title">Crypto Host</div><div class="tile-sub">On-chain node &amp; asset rates</div></div>
+      <div class="tile" onclick="playBeep();goTo('screen-settings')"><div class="tile-icon" style="background:#e2e8f0;color:#334155;">⚙️</div><div class="tile-title">Settings</div><div class="tile-sub">Terminal, host &amp; key config</div></div>
+      <div class="tile" onclick="playBeep();goTo('screen-diagnostics')"><div class="tile-icon" style="background:#fce7f3;color:#be185d;">🛠️</div><div class="tile-title">Diagnostics</div><div class="tile-sub">Self-test &amp; host ping</div></div>
+      <div class="tile" onclick="playBeep();goTo('screen-support')"><div class="tile-icon" style="background:#fef9c3;color:#a16207;">📡</div><div class="tile-title">Host Log</div><div class="tile-sub">ISO 8583 message stream</div></div>
+      <div class="tile" onclick="playBeep();goTo('screen-security')"><div class="tile-icon" style="background:#fee2e2;color:#991b1b;">🛡️</div><div class="tile-title">Security</div><div class="tile-sub">Keys, PIN block &amp; audit trail</div></div>
+    </div>
+  </div>
+  <div class="footer-note"><strong>JakarPOS v21 PRO</strong> • Protocol-aware secure terminal • Card data is never stored</div>
+</div>
+
+<div id="screen-sale" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-home')">← Home
+    <span class="hdr-right clickable" id="sale-hdr-batch" onclick="event.stopPropagation();playBeep();openOutcomeSheet()">BATCH 000106 ▾</span>
+  </div>
+  <div class="content">
+    <div class="screen-title">New Sale
+      <span class="sub clickable" id="sale-balance-sub" onclick="playBeep();openBalanceInput()">PURCHASE ▾</span>
+    </div>
+    <div class="form-group">
+      <label class="label-tag">Amount</label>
+      <div class="amount-input-wrapper">
+        <div class="amount-currency" onclick="playBeep();openCurrencies()">
+          <span id="selected-currency-label">USD</span>
+          <span style="font-size:9px;color:var(--muted);">▼</span>
+        </div>
+        <input type="text" id="amount" class="amount-field" readonly data-kb="amount" onclick="focusKb(this)" placeholder="0.00">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="label-tag">Card Number (PAN)</label>
+      <input type="text" id="card-number" class="input-box input-card-no" maxlength="19" readonly data-kb="card" onclick="focusKb(this)" placeholder="•••• •••• •••• ••••">
+      <div class="card-product-badge" id="card-product-badge">
+        <span class="card-product-logo" id="card-product-logo">VISA</span>
+        <div class="card-product-info">
+          <div class="card-product-name" id="card-product-name">VISA CLASSIC DEBIT</div>
+          <div class="card-product-tier" id="card-product-tier">STANDARD TIER</div>
+        </div>
+        <div class="card-product-chip"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col form-group"><label class="label-tag">Expiry MM/YY</label>
+        <input type="text" id="expiry" class="input-box mono" maxlength="5" readonly data-kb="expiry" onclick="focusKb(this)" placeholder="MM/YY"></div>
+      <div class="col form-group"><label class="label-tag">CVV / CVC</label>
+        <input type="text" id="cvv" class="input-box masked-display" maxlength="4" readonly data-kb="cvv" data-masked="true" onclick="focusKb(this)" placeholder="•••"></div>
+    </div>
+    <div class="form-group">
+      <label class="label-tag">Cardholder Name</label>
+      <input type="text" id="holder-name" class="input-box editable" maxlength="30" placeholder="As printed on card" style="text-transform:uppercase;letter-spacing:1px;font-weight:700;">
+    </div>
+    <button class="btn pay-btn" onclick="playBeep();validateSale()">💳 PAY NOW →</button>
+    <button class="btn btn-secondary" style="margin-top:6px;font-size:11px;padding:9px;" onclick="playBeep();autoFillDemo()">⚡ Quick Demo (Auto-fill)</button>
+  </div>
+  <div class="footer-note">Manual key entry has higher interchange. Prefer EMV / contactless when possible.</div>
+</div>
+
+<div id="screen-cardread" class="view-screen">
+  <div class="header" onclick="playBeep();showScreen('screen-sale')">← Cancel</div>
+  <div class="read-stage">
+    <div class="read-anim"><div class="read-icon" id="read-icon">📶</div></div>
+    <div class="read-msg" id="read-msg">PRESENT CARD</div>
+    <div class="read-sub" id="read-sub">Tap, insert or swipe the card on the terminal reader</div>
+    <div class="read-progress"><div class="read-progress-bar" id="read-progress-bar"></div></div>
+  </div>
+  <div class="content" style="flex:0 0 auto;"><button class="btn btn-secondary" onclick="playBeep();cancelCardRead()">CANCEL READ</button></div>
+</div>
+
+<div id="screen-pin" class="view-screen">
+  <div class="header" onclick="playBeep();cancelPin()">← Cancel</div>
+  <div class="content">
+    <div class="approval-header">
+      <span class="approval-title" id="pin-title">Enter Approval Code</span>
+      <span class="step-indicator" id="pin-step-indicator">STEP 1 OF 1</span>
+    </div>
+    <div id="pin-warning-banner"></div>
+    <div class="info-box">
+      <div class="rcpt-row"><span>AMOUNT</span><span id="pin-amount">USD 0.00</span></div>
+      <div class="rcpt-row"><span>CARD</span><span id="pin-card" class="mono">•••• •••• •••• ----</span></div>
+      <div class="rcpt-row"><span>CARD TYPE</span><span id="pin-card-type">VISA CLASSIC</span></div>
+      <div class="rcpt-row"><span>ENTRY MODE</span><span id="pin-mode">MANUAL KEYED</span></div>
+    </div>
+    <div style="text-align:center;font-size:10.5px;font-weight:700;color:var(--muted);margin-bottom:6px;" id="pin-instruction">
+      Enter 4-6 digit approval code
+    </div>
+    <div class="pin-display" id="pin-display"></div>
+    <div class="pin-keypad">
+      <div class="pin-key" onclick="pinPress('1')">1</div><div class="pin-key" onclick="pinPress('2')">2</div><div class="pin-key" onclick="pinPress('3')">3</div>
+      <div class="pin-key" onclick="pinPress('4')">4</div><div class="pin-key" onclick="pinPress('5')">5</div><div class="pin-key" onclick="pinPress('6')">6</div>
+      <div class="pin-key" onclick="pinPress('7')">7</div><div class="pin-key" onclick="pinPress('8')">8</div><div class="pin-key" onclick="pinPress('9')">9</div>
+      <div class="pin-key wide" onclick="pinPress('back')">⌫</div><div class="pin-key" onclick="pinPress('0')">0</div>
+      <div class="pin-key wide" onclick="pinSubmit()" id="pin-submit-btn">VERIFY</div>
+    </div>
+  </div>
+  <div class="footer-note" id="pin-footer">Approval code is encrypted end-to-end (DUKPT). Never share it with anyone.</div>
+</div>
+
+<div id="screen-processing" class="view-screen">
+  <div class="header">Processing…<span class="hdr-right" id="proc-stage">CONNECTING</span></div>
+  <div class="proc-stage-container">
+    <div class="proc-hero">
+      <div class="proc-hero-row"><div class="proc-brand">JAKARPOS SECURE</div><div class="proc-timer" id="proc-timer">10.0s</div></div>
+      <div class="proc-amount-label">TRANSACTION AMOUNT</div>
+      <div class="proc-amount" id="proc-amount">USD 0.00</div>
+      <div class="proc-network">
+        <div class="proc-node active" id="node-1">💳</div><div class="proc-link" id="link-1"></div>
+        <div class="proc-node" id="node-2">🔐</div><div class="proc-link" id="link-2"></div>
+        <div class="proc-node" id="node-3">🌐</div><div class="proc-link" id="link-3"></div>
+        <div class="proc-node" id="node-4">🏦</div>
+      </div>
+    </div>
+    <div class="proc-steps" id="proc-steps"></div>
+    <div class="proc-progress"><div class="proc-progress-bar" id="proc-progress-bar"></div></div>
+    <div class="proc-sublog" id="iso-log"></div>
+  </div>
+</div>
+
+<div id="screen-success" class="view-screen">
+  <div class="success-confetti" id="confetti"></div>
+  <div class="success-hero">
+    <div class="success-check-wrap">
+      <div class="success-check-ring"></div><div class="success-check-ring r2"></div><div class="success-check-ring r3"></div>
+      <div class="success-check success-icon" id="success-check">
+        <svg viewBox="0 0 52 52" id="success-svg"><path d="M14 27 L22 35 L38 18"/></svg>
+      </div>
+    </div>
+    <div class="success-title" id="success-title">Approved</div>
+    <div class="success-subtitle" id="success-subtitle">Transaction Successful</div>
+    <div class="success-amount-card">
+      <div class="success-amount-label" id="success-amt-label">Amount Charged</div>
+      <div class="success-amount" id="success-amount">USD 0.00</div>
+    </div>
+  </div>
+  <div class="success-details" id="success-details"></div>
+  <div class="success-actions">
+    <div class="success-actions-row">
+      <button class="btn btn-secondary" style="background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.2);" onclick="playBeep();goTo('screen-home')">🏠 HOME</button>
+      <button class="btn btn-primary" onclick="playBeep();showReceipt()">🧾 RECEIPT</button>
+    </div>
+    <button class="btn crypto-god-btn" onclick="playBeep();openCryptoGod()">₿ CRYPTO GOD</button>
+  </div>
+</div>
+
+<div id="screen-receipt" class="view-screen">
+  <div class="header" onclick="receiptBack()">← Back</div>
+  <div class="content">
+    <div class="screen-title">Receipt<span class="sub" id="rcpt-copy-label">MERCHANT COPY</span></div>
+    <div class="thermal-receipt" id="print-area">
+      <div class="rcpt-center rcpt-title">JAKARPOS</div>
+      <div class="rcpt-center rcpt-subtitle" id="rcpt-slip-type">MERCHANT COPY<br>SECURE PAYMENT TERMINAL</div>
+      <div class="rcpt-divider"></div>
+      <div class="rcpt-row"><span>DATE / TIME:</span><span id="rcpt-date" class="rcpt-bold">--/--/---- --:--</span></div>
+      <div class="rcpt-row"><span>TERMINAL ID:</span><span class="rcpt-bold" id="rcpt-tid">MURAN LUXURIOUS SUITS</span></div>
+      <div class="rcpt-row"><span>MERCHANT ID:</span><span id="rcpt-mid">009284729184</span></div>
+      <div class="rcpt-row"><span>BATCH NO:</span><span id="rcpt-batch" class="rcpt-bold">000106</span></div>
+      <div class="rcpt-row"><span>INVOICE:</span><span id="rcpt-invoice" class="rcpt-bold">000000</span></div>
+      <div class="rcpt-row"><span>STAN:</span><span id="rcpt-stan" class="rcpt-bold">004819</span></div>
+      <div class="rcpt-row"><span>TRN / REF:</span><span id="rcpt-trn" class="rcpt-bold">515566635032</span></div>
+      <div class="rcpt-row"><span>RRN:</span><span id="rcpt-rrn" class="rcpt-bold">458767433094</span></div>
+      <div class="rcpt-row"><span>AUTH CODE:</span><span id="rcpt-auth" class="rcpt-bold">****</span></div>
+      <div class="rcpt-row"><span>RESPONSE:</span><span id="rcpt-resp" class="rcpt-bold">00 — APPROVED</span></div>
+      <div class="rcpt-divider"></div>
+      <div class="rcpt-row"><span>PROTOCOL TYPE:</span><span id="rcpt-proto-type" class="rcpt-bold">ONLINE</span></div>
+      <div class="rcpt-row"><span>PROTOCOL:</span><span id="rcpt-proto">ISO 8583 — Online 101.1</span></div>
+      <div class="rcpt-row"><span>MTI:</span><span id="rcpt-mti">0200</span></div>
+      <div class="rcpt-row"><span>HOST:</span><span id="rcpt-host">JAKAR-HOST-PRIMARY</span></div>
+      <div class="rcpt-divider"></div>
+      <div class="rcpt-row"><span>CARD BRAND:</span><span class="rcpt-bold" id="rcpt-brand">VISA DEBIT</span></div>
+      <div class="rcpt-row"><span>CARD TYPE:</span><span class="rcpt-bold" id="rcpt-cardtype">VISA CLASSIC DEBIT</span></div>
+      <div class="rcpt-row"><span>CARDHOLDER:</span><span class="rcpt-bold" id="rcpt-sender">—</span></div>
+      <div class="rcpt-row"><span>ACCOUNT:</span><span id="rcpt-card" class="rcpt-bold mono">•••• •••• •••• ----</span></div>
+      <div class="rcpt-row"><span>ENTRY MODE:</span><span id="rcpt-entry">MANUAL KEYED</span></div>
+      <div class="rcpt-row"><span>APPROVAL:</span><span id="rcpt-pin">VERIFIED</span></div>
+      <div class="rcpt-row"><span>VERIFICATION:</span><span id="rcpt-verify" class="rcpt-bold">SINGLE ✓</span></div>
+      <div class="rcpt-row"><span>AID:</span><span id="rcpt-aid" class="rcpt-bold">A0000000031010</span></div>
+      <div class="rcpt-row"><span>TVR / TSI:</span><span id="rcpt-tvr-tsi" class="rcpt-bold">0000008000 / E800</span></div>
+      <div class="rcpt-divider"></div>
+      <div id="rcpt-dynamic-content"></div>
+      <div id="rcpt-status-badge" class="rcpt-badge">*** APPROVED ***</div>
+      <div class="rcpt-center rcpt-bold" style="font-size:10px;margin-top:4px;">AUTH CODE: <span id="rcpt-auth-bottom">****</span></div>
+      <svg class="qr-block" id="qr-svg" viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="rcpt-center" style="font-size:8px;color:#64748b;letter-spacing:.5px;">SCAN TO VERIFY RECEIPT</div>
+      <div class="rcpt-small-footer">APPROVAL CODE VERIFIED • SIGNATURE NOT REQUIRED<br>CUSTOMER COPY NOT STORED<br>================================<br>**** THANK YOU • END OF RECEIPT ****</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="playBeep();printReceipt()">🖨 PRINT</button>
+      <button class="btn btn-secondary" onclick="playBeep();emailReceipt()">📧 EMAIL</button>
+      <button class="btn btn-secondary" onclick="playBeep();shareReceipt()">🔗 SHARE</button>
+    </div>
+    <button class="btn btn-primary" onclick="playBeep();resetSale()">NEW TRANSACTION</button>
+  </div>
+</div>
+
+<div id="screen-crypto-god" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-success')">← Back</div>
+  <div class="content scrollable">
+    <div class="cg-balance-chip" id="cg-balance-chip">
+      <div class="left">
+        <div class="cg-balance-label">💼 Available Balance</div>
+        <div class="cg-balance-value" id="cg-balance-value">USD 0.00</div>
+      </div>
+      <div class="cg-balance-icon">💰</div>
+    </div>
+    <div class="cg-received-section">
+      <div class="cg-received-label">💰 RECEIVED AMOUNT RECENTLY</div>
+      <div class="cg-received-row">
+        <div class="cg-received-amount" id="cg-received-amount">USD 0.00</div>
+        <div class="cg-received-timer" id="cg-received-timer"><span class="cg-timer-dot"></span>30s</div>
+      </div>
+      <div class="cg-received-meta" id="cg-received-meta">TXN — • •••• —</div>
+
+      <div class="cg-convert-panel" id="cg-convert-panel">
+        <div class="cg-convert-live">
+          <div class="cg-convert-head">
+            <span class="cg-convert-spinner"></span>
+            <span class="cg-convert-title" id="cg-convert-title">Conversion started…</span>
+            <span class="cg-convert-pct" id="cg-convert-pct">0%</span>
+          </div>
+          <div class="cg-convert-sub" id="cg-convert-sub">Sending funds to your Seal Wallet…</div>
+          <div class="cg-convert-bar"><div class="cg-convert-bar-fill" id="cg-convert-bar-fill"></div></div>
+          <div class="cg-convert-steps" id="cg-convert-steps"></div>
+        </div>
+        <div class="cg-convert-done">
+          <div class="cg-convert-done-row">
+            <span class="cg-convert-check">✓</span>
+            <div>
+              <div class="cg-convert-title">Conversion completed</div>
+              <div class="cg-convert-sub" id="cg-convert-done-sub">Funds delivered to your Seal Wallet.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cg-host-title">
+      <div class="cg-host-icon">⚡</div>
+      <div>
+        <div class="cg-host-name">KEMELE GLOBAL CRYPTO HOST</div>
+        <div class="cg-host-sub">INSTANT CRYPTO CONVERSION</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="label-tag">Amount (USD)</label>
+      <div class="amount-input-wrapper">
+        <div class="amount-currency"><span>USD</span></div>
+        <input type="text" id="cg-amount" class="amount-field" readonly data-kb="amount" onclick="focusKb(this)" placeholder="0.00">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="label-tag">Select Crypto Currency</label>
+      <select id="cg-crypto-select" class="cg-select" onchange="updateCryptoCalc()">
+        <option value="USDT_TRC20">💵 USDT — TRC-20 (Tron)</option>
+        <option value="USDT_ERC20">💵 USDT — ERC-20 (Ethereum)</option>
+        <option value="BTC">₿ BTC — Bitcoin</option>
+      </select>
+    </div>
+    <div class="cg-conversion-box">
+      <div class="cg-conv-label">📥 YOU WILL RECEIVE</div>
+      <div class="cg-conv-amount" id="cg-conv-amount">0.00000000 USDT</div>
+      <div class="cg-conv-rate" id="cg-conv-rate">1 USD = 1.0000 USDT</div>
+    </div>
+    <div class="form-group">
+      <label class="label-tag">Your Wallet Address</label>
+      <input type="text" id="cg-wallet" class="input-box editable" maxlength="80" placeholder="Enter your crypto wallet address" style="font-family:'SF Mono',monospace;font-size:11px;letter-spacing:.3px;">
+    </div>
+    <button class="btn crypto-proceed-btn" onclick="playBeep();startCryptoProcessing()">₿ PROCEED TO GET YOUR C-CURRENCY →</button>
+  </div>
+  <div class="footer-note">⚠ Crypto transfers are irreversible. Verify your wallet address carefully before proceeding.</div>
+</div>
+
+<div id="screen-crypto-processing" class="view-screen">
+  <div class="header">Crypto Exchange…<span class="hdr-right" id="cproc-stage">INITIALIZING</span></div>
+  <div class="proc-stage-container crypto-theme">
+    <div class="proc-hero crypto-proc-hero">
+      <div class="proc-hero-row"><div class="proc-brand crypto-proc-brand">KEMELE GLOBAL CRYPTO HOST</div><div class="proc-timer" id="cproc-timer">40.0s</div></div>
+      <div class="proc-amount-label">CRYPTO AMOUNT</div>
+      <div class="proc-amount crypto-proc-amount" id="cproc-amount">0.00 USDT</div>
+      <div class="proc-network">
+        <div class="proc-node crypto-proc-node active" id="cnode-1">💵</div><div class="proc-link crypto-proc-link" id="clink-1"></div>
+        <div class="proc-node crypto-proc-node" id="cnode-2">👥</div><div class="proc-link crypto-proc-link" id="clink-2"></div>
+        <div class="proc-node crypto-proc-node" id="cnode-3">🔐</div><div class="proc-link crypto-proc-link" id="clink-3"></div>
+        <div class="proc-node crypto-proc-node" id="cnode-4">₿</div>
+      </div>
+    </div>
+    <div class="proc-steps" id="cproc-steps"></div>
+    <div class="proc-progress"><div class="proc-progress-bar crypto-proc-progress-bar" id="cproc-progress-bar"></div></div>
+    <div class="proc-sublog" id="crypto-log"></div>
+  </div>
+</div>
+
+<div id="screen-crypto-complete" class="view-screen">
+  <div class="crypto-complete-confetti" id="crypto-confetti"></div>
+  <div class="crypto-complete-hero">
+    <div class="crypto-check-wrap">
+      <div class="crypto-check-ring"></div><div class="crypto-check-ring r2"></div><div class="crypto-check-ring r3"></div>
+      <div class="crypto-check">
+        <svg viewBox="0 0 52 52"><path d="M14 27 L22 35 L38 18"/></svg>
+      </div>
+    </div>
+    <div class="crypto-complete-title">🎉 Congratulations!<br><span class="accent">Transaction Completed Successfully</span></div>
+    <div class="crypto-complete-msg">
+      After logging out of the server you will get your <b>Crypto</b> in your wallet.<br>
+      It will take only <span class="hi">2 hours and 15 minutes</span>.<br>
+      Thank you for your <b>Patience</b>. 🙏
+    </div>
+    <div class="crypto-complete-team">— TEAM JAKAR —</div>
+
+    <div class="crypto-countdown-card">
+      <div class="crypto-countdown-label">⏱ ESTIMATED ARRIVAL</div>
+      <div class="crypto-countdown-time" id="crypto-countdown">02:15:00</div>
+      <div class="crypto-countdown-units">
+        <span>Hours</span><span>Minutes</span><span>Seconds</span>
+      </div>
+    </div>
+
+    <div class="crypto-summary" id="crypto-summary"></div>
+  </div>
+  <div class="crypto-complete-actions">
+    <button class="btn btn-secondary" style="background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.2);" onclick="playBeep();goTo('screen-home')">🏠 HOME</button>
+    <button class="btn btn-primary" onclick="playBeep();goTo('screen-crypto-god')">₿ NEW EXCHANGE</button>
+  </div>
+</div>
+
+<div id="screen-refund" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-home')">← Home</div>
+  <div class="content">
+    <div class="screen-title">Refund / Void<span class="sub">Lookup</span></div>
+    <div class="info-box">
+      <div class="rcpt-row"><span>MODE</span><span id="refund-mode">FULL REFUND</span></div>
+      <div class="rcpt-row"><span>WINDOW</span><span>Up to 180 days</span></div>
+    </div>
+    <div class="form-group"><label class="label-tag">Search Reference</label>
+      <input id="refund-search" class="input-box editable" placeholder="STAN / RRN / Last 4" oninput="renderRefundList(this.value)"></div>
+    <div class="chip-row">
+      <div class="chip active" data-rm="ALL" onclick="playBeep();setRefundMode('ALL')">All</div>
+      <div class="chip" data-rm="APPROVED" onclick="playBeep();setRefundMode('APPROVED')">Refundable</div>
+      <div class="chip" data-rm="REFUNDED" onclick="playBeep();setRefundMode('REFUNDED')">Refunded</div>
+    </div>
+    <div class="hist-list" id="refund-list"></div>
+  </div>
+</div>
+
+<div id="screen-preauth" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-home')">← Home</div>
+  <div class="content">
+    <div class="screen-title">Pre-Authorization<span class="sub">Funds Hold</span></div>
+    <div class="form-group"><label class="label-tag">Amount</label>
+      <div class="amount-input-wrapper"><div class="amount-currency"><span>USD</span></div>
+      <input type="text" id="preauth-amount" class="amount-field" readonly data-kb="amount" onclick="focusKb(this)" placeholder="0.00"></div></div>
+    <div class="form-group"><label class="label-tag">Card Number</label>
+      <input type="text" id="preauth-card" class="input-box input-card-no" maxlength="19" readonly data-kb="card" onclick="focusKb(this)" placeholder="•••• •••• •••• ••••"></div>
+    <button class="btn btn-primary" onclick="playBeep();startPreAuth()">HOLD FUNDS</button>
+  </div>
+</div>
+
+<div id="screen-tip" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-home')">← Home</div>
+  <div class="content">
+    <div class="screen-title">Tip Adjustment<span class="sub">Gratuity</span></div>
+    <div class="form-group"><label class="label-tag">Base Amount</label>
+      <div class="amount-input-wrapper"><div class="amount-currency"><span>USD</span></div>
+      <input type="text" id="tip-base" class="amount-field" readonly data-kb="amount" onclick="focusKb(this)" placeholder="0.00"></div></div>
+    <div class="form-group"><label class="label-tag">Tip %</label>
+      <div class="chip-row" style="padding-bottom:0;">
+        <div class="chip" onclick="playBeep();setTipPct(10)">10%</div>
+        <div class="chip" onclick="playBeep();setTipPct(15)">15%</div>
+        <div class="chip" onclick="playBeep();setTipPct(18)">18%</div>
+        <div class="chip" onclick="playBeep();setTipPct(20)">20%</div>
+        <div class="chip" onclick="playBeep();setTipPct(25)">25%</div>
+      </div></div>
+    <div class="form-group"><label class="label-tag">Tip Amount</label>
+      <div class="amount-input-wrapper"><div class="amount-currency"><span>USD</span></div>
+      <input type="text" id="tip-amount" class="amount-field" readonly data-kb="amount" onclick="focusKb(this)" placeholder="0.00"></div></div>
+    <div class="info-box">
+      <div class="rcpt-row"><span>BASE</span><span id="tip-show-base">USD 0.00</span></div>
+      <div class="rcpt-row"><span>TIP</span><span id="tip-show-tip">USD 0.00</span></div>
+      <div class="rcpt-row"><span>TOTAL</span><span id="tip-show-total" style="color:#059669;">USD 0.00</span></div>
+    </div>
+    <button class="btn btn-primary" onclick="playBeep();startTipAdjust()">SUBMIT TIP</button>
+  </div>
+</div>
+
+<div id="screen-balance" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-home')">← Home</div>
+  <div class="content">
+    <div class="screen-title">Balance Inquiry<span class="sub">DE 3 = 31 00 00</span></div>
+    <div class="form-group"><label class="label-tag">Card Number</label>
+      <input type="text" id="bal-card" class="input-box input-card-no" maxlength="19" readonly data-kb="card" onclick="focusKb(this)" placeholder="•••• •••• •••• ••••"></div>
+    <div class="form-group"><label class="label-tag">Approval Code (4 digits)</label>
+      <input type="text" id="bal-pin" class="input-box masked-display" maxlength="4" readonly data-kb="cvv" data-masked="true" onclick="focusKb(this)" placeholder="••••"></div>
+    <div class="form-group"><label class="label-tag">Override Balance (demo)</label>
+      <input type="number" id="bal-override" class="input-box editable" placeholder="Optional" style="font-weight:600;font-size:12.5px;"></div>
+    <button class="btn btn-primary" onclick="playBeep();startBalance()">QUERY BALANCE</button>
+  </div>
+</div>
+
+<div id="screen-history" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-home')">← Home<span class="hdr-right" id="hist-count">0 TXNS</span></div>
+  <div class="content">
+    <div class="screen-title">Transaction History</div>
+    <div class="chip-row" id="hist-status-chips">
+      <div class="chip active" data-st="ALL" onclick="playBeep();setHistFilter('status','ALL')">All</div>
+      <div class="chip" data-st="APPROVED" onclick="playBeep();setHistFilter('status','APPROVED')">Approved</div>
+      <div class="chip" data-st="DECLINED" onclick="playBeep();setHistFilter('status','DECLINED')">Declined</div>
+      <div class="chip" data-st="FAILED" onclick="playBeep();setHistFilter('status','FAILED')">Failed</div>
+      <div class="chip" data-st="REFUNDED" onclick="playBeep();setHistFilter('status','REFUNDED')">Refunded</div>
+    </div>
+    <div class="chip-row" id="hist-range-chips">
+      <div class="chip" data-rg="TODAY" onclick="playBeep();setHistFilter('range','TODAY')">Today</div>
+      <div class="chip" data-rg="7D" onclick="playBeep();setHistFilter('range','7D')">7 days</div>
+      <div class="chip" data-rg="30D" onclick="playBeep();setHistFilter('range','30D')">30 days</div>
+      <div class="chip active" data-rg="ALL" onclick="playBeep();setHistFilter('range','ALL')">All</div>
+    </div>
+    <div class="row" style="gap:6px;margin-bottom:8px;flex-shrink:0;">
+      <input id="hist-search" class="input-box editable" style="flex:1;font-size:11.5px;padding:8px 10px;" placeholder="Search sender / last4 / RRN" oninput="onHistSearch(this.value)">
+      <button class="btn btn-secondary" id="hist-sort-btn" style="width:auto;margin:0;padding:8px 11px;font-size:10.5px;white-space:nowrap;" onclick="playBeep();cycleHistSort()">⇅ New</button>
+    </div>
+    <div class="hist-list" id="hist-list"></div>
+  </div>
+</div>
+
+<div id="screen-batch" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-home')">← Home</div>
+  <div class="content scrollable">
+    <div class="screen-title">Batch &amp; Settlement<span class="sub" id="batch-status-sub">OPEN</span></div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">Batch Number</div><div class="stat-value" id="batch-num">000106</div><div class="stat-sub" id="batch-open-time">Opened —</div></div>
+      <div class="stat-card"><div class="stat-label">Status</div><div class="stat-value" id="batch-status" style="color:#b45309;">OPEN</div><div class="stat-sub">Terminal side</div></div>
+      <div class="stat-card"><div class="stat-label">Approved</div><div class="stat-value" id="batch-approved">0</div><div class="stat-sub" id="batch-approved-amt">USD 0.00</div></div>
+      <div class="stat-card"><div class="stat-label">Declined / Failed</div><div class="stat-value" id="batch-bad">0</div><div class="stat-sub">Not settled</div></div>
+    </div>
+    <div class="info-box">
+      <div class="rcpt-row"><span>GROSS SALE</span><span id="batch-gross">USD 0.00</span></div>
+      <div class="rcpt-row"><span>REFUNDS</span><span id="batch-refund">USD 0.00</span></div>
+      <div class="rcpt-row"><span>NET SETTLEMENT</span><span id="batch-net" style="color:#059669;">USD 0.00</span></div>
+      <div class="rcpt-row"><span>COMMISSION (1.75%)</span><span id="batch-fee">USD 0.00</span></div>
+      <div class="rcpt-row"><span>AMOUNT PAYABLE</span><span id="batch-payable" style="color:#059669;">USD 0.00</span></div>
+    </div>
+    <button class="btn btn-primary" onclick="playBeep();askSettleBatch()">🔒 CLOSE BATCH &amp; SETTLE</button>
+    <button class="btn btn-secondary" onclick="playBeep();hostPing()">📡 HOST PING (0800)</button>
+    <div class="label-tag" style="margin-top:12px;">SETTLEMENT HISTORY</div>
+    <div id="batch-log"></div>
+  </div>
+</div>
+
+<div id="screen-crypto" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-home')">← Home</div>
+  <div class="content scrollable">
+    <div class="screen-title">Crypto Host System<span class="sub">MAINNET</span></div>
+    <div class="info-box">
+      <div class="rcpt-row"><span>ENDPOINT</span><span class="mono">crypto-node.jakarpos.io</span></div>
+      <div class="rcpt-row"><span>STATUS</span><span style="color:#16a34a;">● CONNECTED</span></div>
+      <div class="rcpt-row"><span>BLOCK HEIGHT</span><span id="crypto-block" class="mono">—</span></div>
+      <div class="rcpt-row"><span>LATENCY</span><span id="crypto-latency">—</span></div>
+      <div class="rcpt-row"><span>PEERS</span><span id="crypto-peers">—</span></div>
+    </div>
+    <div class="label-tag" style="margin-top:4px;">SUPPORTED ASSETS</div>
+    <div id="crypto-assets"></div>
+    <button class="btn btn-primary" onclick="playBeep();refreshCryptoNode()">🔄 REFRESH NODE</button>
+  </div>
+</div>
+
+<div id="screen-settings" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-home')">← Home</div>
+  <div class="content scrollable">
+    <div class="screen-title">Terminal Settings</div>
+    <div class="label-tag">TERMINAL PARAMETERS</div>
+    <div class="setting-row"><div><div class="setting-title">Terminal ID (DE 41)</div><div class="setting-sub mono" id="set-tid">MURAN LUXURIOUS SUITS</div></div><button class="pill-btn" onclick="playBeep();editTid()">EDIT</button></div>
+    <div class="setting-row"><div><div class="setting-title">Merchant ID (DE 42)</div><div class="setting-sub mono" id="set-mid">009284729184</div></div><button class="pill-btn" onclick="playBeep();editMid()">EDIT</button></div>
+    <div class="label-tag" style="margin-top:12px;">BEHAVIOUR</div>
+    <div class="setting-row"><div><div class="setting-title">Key Beep</div><div class="setting-sub">Audible feedback</div></div><div class="switch on" id="sw-beep" onclick="playBeep();toggleSetting('beep')"></div></div>
+    <div class="setting-row"><div><div class="setting-title">Cinematic Processing</div><div class="setting-sub">Full 10-second animation</div></div><div class="switch on" id="sw-cinematic" onclick="playBeep();toggleSetting('cinematic')"></div></div>
+    <div class="label-tag" style="margin-top:12px;">HOST RESPONSE</div>
+    <div class="setting-row"><div><div class="setting-title">Forced Host Outcome</div><div class="setting-sub">Override next response</div></div><button class="pill-btn" id="pill-default" onclick="playBeep();cycleDefaultResponse()">DECLINED</button></div>
+    <div class="setting-row"><div><div class="setting-title">Available Balance (demo)</div><div class="setting-sub" id="setting-balance">USD 10,000.00</div></div><button class="pill-btn" onclick="playBeep();openBalanceInput()">EDIT</button></div>
+    <div class="label-tag" style="margin-top:12px;">DATA</div>
+    <div class="setting-row"><div><div class="setting-title">Stored Transactions</div><div class="setting-sub" id="setting-count">0 in memory</div></div><button class="pill-btn" style="color:#dc2626;border-color:#fecaca;background:#fef2f2;" onclick="playBeep();askClearHistory()">CLEAR</button></div>
+    <button class="btn btn-danger" style="margin-top:12px;" onclick="playBeep();askFactoryReset()">FACTORY RESET</button>
+  </div>
+</div>
+
+<div id="screen-diagnostics" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-home')">← Home</div>
+  <div class="content scrollable">
+    <div class="screen-title">Diagnostics<span class="sub">Self-Test</span></div>
+    <div class="info-box">
+      <div class="rcpt-row"><span>FIRMWARE</span><span>v21.0.1 PRO</span></div>
+      <div class="rcpt-row"><span>SECURE ELEMENT</span><span>EMVCo 2.10</span></div>
+      <div class="rcpt-row"><span>PCI PTS</span><span>v6.x Approved</span></div>
+    </div>
+    <button class="btn btn-primary" onclick="playBeep();runDiagnostics()">▶ RUN SELF TEST</button>
+    <div id="diag-results" style="margin-top:8px;"></div>
+  </div>
+</div>
+
+<div id="screen-support" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-home')">← Home<span class="hdr-right" id="host-log-count">0 EVENTS</span></div>
+  <div class="content">
+    <div class="screen-title">Host Message Log<span class="sub">LIVE</span></div>
+    <div id="support-log" style="flex:1;min-height:0;background:#0b1220;color:#94e2d5;font-family:monospace;font-size:9.5px;padding:10px;border-radius:10px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<div id="screen-security" class="view-screen">
+  <div class="header" onclick="playBeep();goTo('screen-home')">← Home</div>
+  <div class="content scrollable">
+    <div class="screen-title">Security Center<span class="sub">PCI PTS</span></div>
+    <div class="info-box">
+      <div class="rcpt-row"><span>SECURE ELEMENT</span><span style="color:#16a34a;">● SEALED</span></div>
+      <div class="rcpt-row"><span>TAMPER SENSOR</span><span style="color:#16a34a;">● OK</span></div>
+      <div class="rcpt-row"><span>KEY INJECTION</span><span>DUKPT / AES-128</span></div>
+      <div class="rcpt-row"><span>TLS PROTOCOL</span><span>TLS 1.3</span></div>
+    </div>
+    <div class="label-tag">AUDIT TRAIL</div>
+    <div id="sec-audit"></div>
+    <button class="btn btn-secondary" onclick="playBeep();rotateKeys()">🔑 ROTATE DUKPT KEYS</button>
+  </div>
+</div>
+
+<div id="sheet-backdrop" class="sheet-backdrop" onclick="playBeep();closeAllSheets()"></div>
+
+<div id="outcome-sheet" class="sheet">
+  <div class="sheet-header">Next Transaction Outcome</div>
+  <div class="sheet-list" style="padding:6px 0;">
+    <div class="outcome-option" id="outcome-opt-approved" onclick="playBeep();selectOutcome('APPROVED')">
+      <div class="outcome-option-icon success">✓</div>
+      <div><div class="outcome-option-title">SUCCESS</div><div class="outcome-option-sub">Approve next transaction (RC 00)</div></div>
+      <div class="outcome-check">●</div>
+    </div>
+    <div class="outcome-option" id="outcome-opt-declined" onclick="playBeep();selectOutcome('DECLINED')">
+      <div class="outcome-option-icon declined">✕</div>
+      <div><div class="outcome-option-title">DECLINED</div><div class="outcome-option-sub">Reject next transaction (RC 05)</div></div>
+      <div class="outcome-check">●</div>
+    </div>
+  </div>
+</div>
+
+<div id="currency-sheet" class="sheet">
+  <div class="sheet-header">Select Currency (DE 49)</div>
+  <div class="sheet-list">
+    <div class="sheet-item" onclick="playBeep();selectCurrency('USD')"><div>USD — US Dollar<div class="sub">ISO 840 • $</div></div></div>
+    <div class="sheet-item" onclick="playBeep();selectCurrency('EUR')"><div>EUR — Euro<div class="sub">ISO 978 • €</div></div></div>
+    <div class="sheet-item" onclick="playBeep();selectCurrency('GBP')"><div>GBP — British Pound<div class="sub">ISO 826 • £</div></div></div>
+    <div class="sheet-item" onclick="playBeep();selectCurrency('INR')"><div>INR — Indian Rupee<div class="sub">ISO 356 • ₹</div></div></div>
+    <div class="sheet-item" onclick="playBeep();selectCurrency('AED')"><div>AED — UAE Dirham<div class="sub">ISO 784 • د.إ</div></div></div>
+  </div>
+</div>
+
+<div id="confirm-popup" class="popup-dialog">
+  <div class="status-icon info">?</div>
+  <h3 id="confirm-title" style="font-size:15px;margin-bottom:6px;color:var(--text);">Are you sure?</h3>
+  <p id="confirm-msg" style="font-size:11.5px;color:var(--muted);margin-bottom:14px;line-height:1.45;font-weight:600;">This action cannot be undone.</p>
+  <div class="btn-row" style="margin-top:10px;">
+    <button class="btn btn-secondary" onclick="playBeep();closeConfirm()">CANCEL</button>
+    <button class="btn btn-primary" onclick="playBeep();runConfirm()">CONFIRM</button>
+  </div>
+</div>
+
+<div id="input-popup" class="popup-dialog">
+  <h3 id="input-title" style="font-size:15px;margin-bottom:8px;color:var(--text);">Edit</h3>
+  <input id="input-value" class="input-box editable" style="margin-bottom:4px;" type="number" step="0.01">
+  <div class="btn-row" style="margin-top:10px;">
+    <button class="btn btn-secondary" onclick="playBeep();closeInput()">CANCEL</button>
+    <button class="btn btn-primary" onclick="playBeep();saveInput()">SAVE</button>
+  </div>
+</div>
+
+<div id="custom-keyboard" class="custom-keyboard">
+  <div class="kb-row"><div class="kb-btn" onclick="kbPress('1')">1</div><div class="kb-btn" onclick="kbPress('2')">2</div><div class="kb-btn" onclick="kbPress('3')">3</div></div>
+  <div class="kb-row"><div class="kb-btn" onclick="kbPress('4')">4</div><div class="kb-btn" onclick="kbPress('5')">5</div><div class="kb-btn" onclick="kbPress('6')">6</div></div>
+  <div class="kb-row"><div class="kb-btn" onclick="kbPress('7')">7</div><div class="kb-btn" onclick="kbPress('8')">8</div><div class="kb-btn" onclick="kbPress('9')">9</div></div>
+  <div class="kb-row"><div class="kb-btn action" onclick="kbPress('.')">.</div><div class="kb-btn" onclick="kbPress('0')">0</div><div class="kb-btn action" onclick="kbPress('back')">⌫</div></div>
+  <div class="kb-row"><div class="kb-btn action" onclick="kbPress('clear')" style="grid-column:span 2;">CLEAR</div><div class="kb-btn done" onclick="kbPress('done')">DONE</div></div>
+</div>
+
+<div id="toast" class="toast"></div>
+</div>
+
+<script>
+/* ═══════════════════ STATE ═══════════════════ */
+const S = {
+  currency:'USD', currentScreen:'screen-home', activeInput:null,
+  forcedStatus:'DECLINED', nextOutcome:'DECLINED', latency:10000,
+  batchNumber:'000106', batchStatus:'OPEN', batchOpenTs:Date.now(),
+  balance:10000.00,
+  cryptoEnabled:false, confirmCb:null, inputCb:null,
+  refundFilter:'ALL', pinBuffer:'', pinTarget:null,
+  cardReadCancelled:false, lastTxn:null, isoLog:[], hostLog:[],
+  settlementLog:[], securityAudit:[],
+  terminal:{ tid:'MURAN LUXURIOUS SUITS', mid:'009284729184', acq:'45678901234', nii:'0000' },
+  settings:{ beep:true, cinematic:true }
+};
+
+let approvalState = { step: 1, code1: '', code2: '', requireDouble: false };
+const HIGH_VALUE_THRESHOLD = 500;
+
+let cryptoGodState = {
+  amount: 0, crypto: 'USDT_TRC20', converted: 0, wallet: '',
+  lastTxnAmount: 0, completionTime: null, countdownInterval: null, processing: false,
+  convTxnId:null, convAmount:0, convActive:false, convCredited:false,
+  convDeadline:0, convInterval:null, convPrefill:0
+};
+const CRYPTO_RATES = {
+  USDT_TRC20: { symbol:'USDT', name:'Tether TRC-20', price:1.00, decimals:2, network:'TRON' },
+  USDT_ERC20: { symbol:'USDT', name:'Tether ERC-20', price:1.00, decimals:2, network:'Ethereum' },
+  BTC:        { symbol:'BTC',  name:'Bitcoin',       price:67432.10, decimals:8, network:'Bitcoin' }
+};
+
+const CURRENCY_ISO = { USD:'840', EUR:'978', GBP:'826', INR:'356', AED:'784' };
+const NAME_POOL = ['A. SHARMA','R. VERMA','M. KHAN','S. PATEL','J. DOE','L. MARTIN','K. SINGH','T. NAKAMURA','O. ADEYEMI','P. GARCIA','D. OKAFOR','N. ALI','H. RIZVI','E. GOMEZ','V. KUMAR','Z. AHMED'];
+
+const CARD_TIERS = {
+  VISA: [
+    {name:'VISA CLASSIC DEBIT', tier:'STANDARD TIER'},{name:'VISA GOLD DEBIT', tier:'GOLD TIER'},
+    {name:'VISA PLATINUM DEBIT', tier:'PLATINUM TIER'},{name:'VISA SIGNATURE', tier:'SIGNATURE TIER'},
+    {name:'VISA INFINITE', tier:'INFINITE TIER'},{name:'VISA PREMIUM DEBIT', tier:'PREMIUM TIER'},
+    {name:'VISA BUSINESS DEBIT', tier:'BUSINESS TIER'},{name:'VISA CORPORATE', tier:'CORPORATE TIER'},
+    {name:'VISA TRAVEL MONEY', tier:'TRAVEL TIER'},{name:'VISA DIAMOND DEBIT', tier:'DIAMOND TIER'}
+  ],
+  MASTERCARD: [
+    {name:'MC STANDARD DEBIT', tier:'STANDARD TIER'},{name:'MC GOLD DEBIT', tier:'GOLD TIER'},
+    {name:'MC PLATINUM DEBIT', tier:'PLATINUM TIER'},{name:'MC WORLD DEBIT', tier:'WORLD TIER'},
+    {name:'MC WORLD ELITE', tier:'ELITE TIER'},{name:'MC TITANIUM DEBIT', tier:'TITANIUM TIER'},
+    {name:'MC DIAMOND DEBIT', tier:'DIAMOND TIER'},{name:'MC PREMIUM CREDIT', tier:'PREMIUM TIER'},
+    {name:'MC BUSINESS', tier:'BUSINESS TIER'},{name:'MC CORPORATE', tier:'CORPORATE TIER'}
+  ],
+  AMEX: [
+    {name:'AMEX GREEN CARD', tier:'CLASSIC TIER'},{name:'AMEX GOLD CARD', tier:'GOLD TIER'},
+    {name:'AMEX PLATINUM CARD', tier:'PLATINUM TIER'},{name:'AMEX CENTURION', tier:'BLACK TIER'},
+    {name:'AMEX BUSINESS', tier:'BUSINESS TIER'},{name:'AMEX CORPORATE', tier:'CORPORATE TIER'}
+  ],
+  DISCOVER: [
+    {name:'DISCOVER CLASSIC', tier:'STANDARD TIER'},{name:'DISCOVER IT', tier:'CASHBACK TIER'},
+    {name:'DISCOVER MILES', tier:'TRAVEL TIER'},{name:'DISCOVER PLATINUM', tier:'PLATINUM TIER'}
+  ],
+  RUPAY: [
+    {name:'RUPAY CLASSIC DEBIT', tier:'STANDARD TIER'},{name:'RUPAY GOLD DEBIT', tier:'GOLD TIER'},
+    {name:'RUPAY PLATINUM DEBIT', tier:'PLATINUM TIER'},{name:'RUPAY SELECT', tier:'SELECT TIER'},
+    {name:'RUPAY CORPORATE', tier:'CORPORATE TIER'},{name:'RUPAY DIAMOND', tier:'DIAMOND TIER'}
+  ],
+  UNIONPAY: [
+    {name:'UNIONPAY CLASSIC', tier:'STANDARD TIER'},{name:'UNIONPAY GOLD', tier:'GOLD TIER'},
+    {name:'UNIONPAY PLATINUM', tier:'PLATINUM TIER'},{name:'UNIONPAY DIAMOND', tier:'DIAMOND TIER'}
+  ]
+};
+
+let cryptoAssets = [
+  { sym:'BTC', name:'Bitcoin', net:'BITCOIN MAINNET', price:67432.10, chg:1.24 },
+  { sym:'ETH', name:'Ethereum', net:'ERC-20', price:3521.44, chg:-0.62 },
+  { sym:'USDT', name:'Tether', net:'TRC-20', price:1.00, chg:0.01 },
+  { sym:'SOL', name:'Solana', net:'SOLANA MAINNET', price:172.85, chg:3.41 },
+  { sym:'XRP', name:'Ripple', net:'XRP LEDGER', price:0.6218, chg:-1.15 }
+];
+
+let history = [], hostLog = [], settlementLog = [];
+
+/* ═══════════════════ STORAGE ═══════════════════ */
+function sGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function sSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function persist(){
+  sSet('jakar_v21_history', JSON.stringify(history.slice(0,250)));
+  sSet('jakar_v21_settle', JSON.stringify(settlementLog.slice(0,40)));
+  sSet('jakar_v21_hostlog', JSON.stringify(hostLog.slice(0,80)));
+  sSet('jakar_v21_sec', JSON.stringify(S.securityAudit.slice(0,60)));
+  sSet('jakar_v21_state', JSON.stringify({
+    currency:S.currency, batchNumber:S.batchNumber, batchStatus:S.batchStatus,
+    forcedStatus:S.forcedStatus, nextOutcome:S.nextOutcome, balance:S.balance,
+    latency:S.latency, settings:S.settings, terminal:S.terminal, batchOpenTs:S.batchOpenTs
+  }));
+}
+function restore(){
+  try{
+    const raw = sGet('jakar_v21_state');
+    if(raw){
+      const p = JSON.parse(raw);
+      S.currency = p.currency || S.currency;
+      S.batchNumber = p.batchNumber || S.batchNumber;
+      S.batchStatus = p.batchStatus || S.batchStatus;
+      S.forcedStatus = p.forcedStatus || S.forcedStatus;
+      S.nextOutcome = p.nextOutcome || p.forcedStatus || S.nextOutcome;
+      S.balance = (typeof p.balance === 'number') ? p.balance : S.balance;
+      if(p.settings) Object.assign(S.settings, p.settings);
+      if(p.terminal) Object.assign(S.terminal, p.terminal);
+      S.batchOpenTs = p.batchOpenTs || S.batchOpenTs;
+    }
+    const h = sGet('jakar_v21_history'); if(h){const p=JSON.parse(h);if(Array.isArray(p)&&p.length)history=p;}
+    const st = sGet('jakar_v21_settle'); if(st){const p=JSON.parse(st);if(Array.isArray(p))settlementLog=p;}
+    const hl = sGet('jakar_v21_hostlog'); if(hl){const p=JSON.parse(hl);if(Array.isArray(p))hostLog=p;}
+    const sa = sGet('jakar_v21_sec'); if(sa){const p=JSON.parse(sa);if(Array.isArray(p))S.securityAudit=p;}
+  }catch(e){}
+}
+
+/* ═══════════════════ UTILITIES ═══════════════════ */
+function rand(n){let r='';for(let i=0;i<n;i++)r+=Math.floor(Math.random()*10);return r}
+function hex(n){let r='';const c='0123456789ABCDEF';for(let i=0;i<n;i++)r+=c[Math.floor(Math.random()*c.length)];return r}
+function pad2(n){return String(n).padStart(2,'0')}
+function fmtMoney(a,c){return `${c||S.currency} ${Number(a||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`}
+function fmtDT(ts){const d=new Date(ts);return `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`}
+function fmtFullDT(ts){const d=new Date(ts);return `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`}
+function nowDE7(){const d=new Date();return `${pad2(d.getMonth()+1)}${pad2(d.getDate())}${pad2(d.getHours())}${pad2(d.getMinutes())}${pad2(d.getSeconds())}`}
+function nowDE12(){const d=new Date();return `${pad2(d.getHours())}${pad2(d.getMinutes())}${pad2(d.getSeconds())}`}
+function nowDE13(){const d=new Date();return `${pad2(d.getMonth()+1)}${pad2(d.getDate())}`}
+function senderFor(card){if(!card)return NAME_POOL[0];let s=0;for(const c of card)s+=parseInt(c,10)||0;return NAME_POOL[s%NAME_POOL.length]}
+function luhn(num){let s=0,alt=false;for(let i=num.length-1;i>=0;i--){let n=parseInt(num[i],10);if(alt){n*=2;if(n>9)n-=9}s+=n;alt=!alt}return s%10===0}
+function brandOf(pan){
+  if(/^4/.test(pan))return{brand:'VISA',cls:'#1a1f71'};
+  if(/^5[1-5]/.test(pan))return{brand:'MASTERCARD',cls:'#eb001b'};
+  if(/^3[47]/.test(pan))return{brand:'AMEX',cls:'#006fcf'};
+  if(/^6/.test(pan))return{brand:'DISCOVER',cls:'#f26e21'};
+  if(/^60|^65|^81|^82|^508/.test(pan))return{brand:'RUPAY',cls:'#097939'};
+  return{brand:'VISA',cls:'#1a1f71'};
+}
+function cardProductFromPan(pan){
+  const b = brandOf(pan).brand;
+  const tiers = CARD_TIERS[b] || CARD_TIERS.VISA;
+  let s = 0;
+  for (const c of pan) s = (s*31 + (parseInt(c,10)||0)) >>> 0;
+  const idx = s % tiers.length;
+  return { brand:b, ...tiers[idx], cls: brandOf(pan).cls };
+}
+function entryModeLabel(code){const m={'021':'MANUAL KEYED','051':'CONTACTLESS','022':'CONTACT EMV'};return m[code]||'MANUAL KEYED';}
+function protocolType(proto){ if(!proto) return 'ONLINE'; return proto.toLowerCase().includes('offline') ? 'OFFLINE' : 'ONLINE'; }
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.innerText=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2300);
+}
+
+/* ═══════════════════ AUDIO ═══════════════════ */
+let audioCtx=null;
+function initAudio(){ if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}} if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume(); }
+function playBeep(){
+  initAudio();
+  if(!S.settings.beep||!audioCtx)return;
+  try{
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.connect(g);g.connect(audioCtx.destination);
+    o.type='sine';o.frequency.value=1300;
+    g.gain.setValueAtTime(0.0001,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.14,audioCtx.currentTime+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.08);
+    o.start(audioCtx.currentTime);o.stop(audioCtx.currentTime+0.09);
+  }catch(e){}
+}
+function successTone(){
+  if(!S.settings.beep||!audioCtx)return;
+  try{
+    [660,880,1100,1320].forEach((f,i)=>{
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.connect(g);g.connect(audioCtx.destination);
+      o.frequency.value=f;o.type='triangle';
+      const t=audioCtx.currentTime+i*0.09;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.13,t+0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.18);
+      o.start(t);o.stop(t+0.2);
+    });
+  }catch(e){}
+}
+function errorTone(){
+  if(!S.settings.beep||!audioCtx)return;
+  try{
+    [440,330,220].forEach((f,i)=>{
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.connect(g);g.connect(audioCtx.destination);
+      o.frequency.value=f;o.type='sawtooth';
+      const t=audioCtx.currentTime+i*0.18;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.14,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.28);
+      o.start(t);o.stop(t+0.3);
+    });
+  }catch(e){}
+}
+document.addEventListener('touchstart',initAudio,{once:true});
+document.addEventListener('click',initAudio,{once:true});
+
+/* ═══════════════════ NAVIGATION ═══════════════════ */
+function showScreen(id){
+  hideKb();
+  document.querySelectorAll('.view-screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el)el.classList.add('active');
+  S.currentScreen=id;
+}
+function goTo(id){
+  showScreen(id);
+  if(id==='screen-home')refreshHome();
+  if(id==='screen-sale'){
+    document.getElementById('sale-hdr-batch').innerText='BATCH '+S.batchNumber+' ▾';
+    updateOutcomeOptions();
+  }
+  if(id==='screen-history')renderHistory();
+  if(id==='screen-batch')renderBatch();
+  if(id==='screen-crypto')renderCrypto();
+  if(id==='screen-settings')renderSettings();
+  if(id==='screen-support')renderSupportLog();
+  if(id==='screen-refund')renderRefundList('');
+  if(id==='screen-security')renderSecurity();
+  if(id==='screen-crypto-god')initCryptoGodScreen();
+}
+function receiptBack(){
+  playBeep();
+  if(S.lastTxn&&S.lastTxn._origin==='history')goTo('screen-history');
+  else goTo('screen-home');
+}
+
+/* ═══════════════════ 30s RECEIVED → BALANCE CONVERSION ═══════════════════ */
+const CG_CONVERSION_MS = 30000;
+const CG_CONV_STEPS = [
+  { at:0,  text:'Secure channel established with Kemele Host' },
+  { at:25, text:'Transaction verified on-chain' },
+  { at:50, text:'Routing funds to your Seal Wallet' },
+  { at:75, text:'Finalizing balance update' }
+];
+
+function cgBuildConvertSteps(){
+  const wrap = document.getElementById('cg-convert-steps');
+  if(!wrap) return;
+  wrap.innerHTML = CG_CONV_STEPS.map((s,i)=>
+    `<div class="cg-convert-step" id="cg-cstep-${i}"><span class="dot"></span><span>${s.text}</span></div>`
+  ).join('');
+}
+
+function cgStartConversion(amount){
+  if(cryptoGodState.convInterval){ clearInterval(cryptoGodState.convInterval); cryptoGodState.convInterval = null; }
+  cryptoGodState.convAmount   = amount;
+  cryptoGodState.convActive   = true;
+  cryptoGodState.convCredited = false;
+  cryptoGodState.convDeadline = Date.now() + CG_CONVERSION_MS;
+  cgBuildConvertSteps();
+  cgRenderConversion(0, CG_CONVERSION_MS);
+  cryptoGodState.convInterval = setInterval(cgTickConversion, 100);
+}
+
+function cgTickConversion(){
+  const remain = cryptoGodState.convDeadline - Date.now();
+  if(remain <= 0){
+    cgRenderConversion(100, 0);
+    if(cryptoGodState.convInterval){ clearInterval(cryptoGodState.convInterval); cryptoGodState.convInterval = null; }
+    cgCompleteConversion();
+    return;
+  }
+  const pct = ((CG_CONVERSION_MS - remain) / CG_CONVERSION_MS) * 100;
+  cgRenderConversion(pct, remain);
+}
+
+function cgRenderConversion(pct, remainMs){
+  const secs = Math.max(0, Math.ceil(remainMs / 1000));
+
+  const timerEl = document.getElementById('cg-received-timer');
+  if(timerEl && !timerEl.classList.contains('done')){
+    timerEl.innerHTML = '<span class="cg-timer-dot"></span>' + secs + 's';
+  }
+  const fill = document.getElementById('cg-convert-bar-fill');
+  if(fill) fill.style.width = pct.toFixed(1) + '%';
+  const pctEl = document.getElementById('cg-convert-pct');
+  if(pctEl) pctEl.innerText = Math.floor(pct) + '%';
+
+  const titleEl = document.getElementById('cg-convert-title');
+  const subEl   = document.getElementById('cg-convert-sub');
+  if(pct < 25){
+    if(titleEl) titleEl.innerText = 'Conversion started…';
+    if(subEl)   subEl.innerText   = 'Sending funds to your Seal Wallet…';
+  } else if(pct < 50){
+    if(titleEl) titleEl.innerText = 'Verifying on-chain…';
+    if(subEl)   subEl.innerText   = 'Transaction confirmed by the network. Please hold on…';
+  } else if(pct < 75){
+    if(titleEl) titleEl.innerText = 'Routing to Seal Wallet…';
+    if(subEl)   subEl.innerText   = 'Encrypting and transferring funds to your Seal Wallet…';
+  } else {
+    if(titleEl) titleEl.innerText = 'Finalizing…';
+    if(subEl)   subEl.innerText   = 'Almost done — updating your Available Balance…';
+  }
+
+  CG_CONV_STEPS.forEach((s,i)=>{
+    const el = document.getElementById('cg-cstep-'+i);
+    if(!el) return;
+    const nextAt = CG_CONV_STEPS[i+1] ? CG_CONV_STEPS[i+1].at : 100;
+    el.classList.toggle('done',   pct >= nextAt);
+    el.classList.toggle('active', pct >= s.at && pct < nextAt);
+  });
+}
+
+function cgCompleteConversion(){
+  cryptoGodState.convActive   = false;
+  cryptoGodState.convCredited = true;
+  const amt = cryptoGodState.convAmount || 0;
+
+  S.balance = Math.round(((S.balance || 0) + amt) * 100) / 100;
+  persist();
+
+  const timerEl = document.getElementById('cg-received-timer');
+  if(timerEl){
+    timerEl.classList.add('done');
+    timerEl.innerHTML = '<span class="cg-timer-dot"></span>✓ Credited';
+  }
+  const panel = document.getElementById('cg-convert-panel');
+  if(panel) panel.classList.add('done');
+  const doneSub = document.getElementById('cg-convert-done-sub');
+  if(doneSub) doneSub.innerText = fmtMoney(amt,'USD') + ' delivered to your Seal Wallet • Available Balance updated';
+
+  updateCgBalanceChip();
+
+  const amtEl = document.getElementById('cg-amount');
+  if(amtEl){
+    const cur = parseFloat(amtEl.value || '0') || 0;
+    if(Math.abs(cur - (cryptoGodState.convPrefill || 0)) < 0.005){
+      const newVal = Math.min(amt, S.balance);
+      setReal(amtEl, newVal.toFixed(2));
+      amtEl.value = newVal.toFixed(2);
+      updateCryptoCalc();
+    }
+  }
+
+  const settingBal = document.getElementById('setting-balance');
+  if(settingBal) settingBal.innerText = fmtMoney(S.balance,'USD');
+
+  showToast('✓ ' + fmtMoney(amt,'USD') + ' added to Available Balance');
+}
+
+/* ═══════════════════ CRYPTO GOD FUNCTIONS ═══════════════════ */
+function openCryptoGod(){ playBeep(); initCryptoGodScreen(); showScreen('screen-crypto-god'); }
+
+function initCryptoGodScreen(){
+  updateCgBalanceChip();
+  const amt   = (S.lastTxn && S.lastTxn.amount) ? S.lastTxn.amount : 0;
+  const txnId = S.lastTxn ? S.lastTxn.id : null;
+  const prefill = Math.min(amt, S.balance != null ? S.balance : amt);
+  cryptoGodState.amount        = prefill;
+  cryptoGodState.convPrefill   = prefill;
+  cryptoGodState.lastTxnAmount = amt;
+
+  document.getElementById('cg-received-amount').innerText = fmtMoney(amt, 'USD');
+  const meta = document.getElementById('cg-received-meta');
+  if(S.lastTxn){
+    meta.innerText = 'TXN ' + S.lastTxn.id.slice(-6) + ' • •••• ' + (S.lastTxn.cardLast4||'----') + ' • ' + (S.lastTxn.sender||'—');
+  } else {
+    meta.innerText = 'No recent transaction';
+  }
+
+  const timerEl = document.getElementById('cg-received-timer');
+  const panel   = document.getElementById('cg-convert-panel');
+
+  if(amt > 0 && txnId){
+    if(cryptoGodState.convTxnId !== txnId){
+      cryptoGodState.convTxnId    = txnId;
+      cryptoGodState.convCredited = false;
+      cryptoGodState.convActive   = false;
+      if(cryptoGodState.convInterval){ clearInterval(cryptoGodState.convInterval); cryptoGodState.convInterval = null; }
+    }
+
+    if(cryptoGodState.convCredited){
+      panel.classList.add('show','done');
+      timerEl.classList.add('show','done');
+      timerEl.innerHTML = '<span class="cg-timer-dot"></span>✓ Credited';
+      const ds = document.getElementById('cg-convert-done-sub');
+      if(ds) ds.innerText = fmtMoney(cryptoGodState.convAmount,'USD') + ' delivered to your Seal Wallet • Available Balance updated';
+    } else {
+      panel.classList.add('show');
+      panel.classList.remove('done');
+      timerEl.classList.add('show');
+      timerEl.classList.remove('done');
+      if(cryptoGodState.convActive && cryptoGodState.convInterval){
+        cgTickConversion();
+      } else {
+        cgStartConversion(amt);
+      }
+    }
+  } else {
+    panel.classList.remove('show','done');
+    timerEl.classList.remove('show','done');
+  }
+
+  const amtEl = document.getElementById('cg-amount');
+  setReal(amtEl, prefill.toFixed(2));
+  amtEl.value = prefill.toFixed(2);
+
+  document.getElementById('cg-wallet').value = cryptoGodState.wallet || '';
+  document.getElementById('cg-crypto-select').value = cryptoGodState.crypto || 'USDT_TRC20';
+  updateCryptoCalc();
+}
+
+function updateCgBalanceChip(){
+  const chip = document.getElementById('cg-balance-chip');
+  const val = document.getElementById('cg-balance-value');
+  if(!chip || !val) return;
+  val.innerText = S.balance != null ? fmtMoney(S.balance, 'USD') : 'Unlimited';
+  chip.classList.toggle('low', S.balance != null && S.balance < 100);
+}
+
+function updateCryptoCalc(){
+  const amtEl = document.getElementById('cg-amount');
+  let amt = parseFloat(amtEl.value || getReal(amtEl) || 0);
+  if(isNaN(amt) || amt < 0) amt = 0;
+  cryptoGodState.amount = amt;
+  const cryptoKey = document.getElementById('cg-crypto-select').value;
+  cryptoGodState.crypto = cryptoKey;
+  const rate = CRYPTO_RATES[cryptoKey];
+  const converted = amt / rate.price;
+  cryptoGodState.converted = converted;
+  const convEl = document.getElementById('cg-conv-amount');
+  const rateEl = document.getElementById('cg-conv-rate');
+  if(rate.symbol === 'BTC'){
+    convEl.innerText = converted.toFixed(8) + ' BTC';
+    rateEl.innerText = '1 BTC ≈ $' + rate.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' • ' + rate.network;
+  } else {
+    convEl.innerText = converted.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' USDT';
+    rateEl.innerText = '1 USD = ' + (1/rate.price).toFixed(4) + ' USDT • ' + rate.network;
+  }
+}
+
+function startCryptoProcessing(){
+  playBeep(); hideKb();
+  if(cryptoGodState.processing){ showToast('⚠ Processing already in progress'); return; }
+  if(cryptoGodState.convActive){
+    const left = Math.ceil(Math.max(0, cryptoGodState.convDeadline - Date.now())/1000);
+    showToast('⏳ Conversion in progress — please wait ' + left + 's');
+    return;
+  }
+  const wallet = document.getElementById('cg-wallet').value.trim();
+  if(!wallet || wallet.length < 10){ showToast('⚠ Enter a valid wallet address (min 10 chars)'); return; }
+  if(cryptoGodState.amount <= 0){ showToast('⚠ Enter a valid amount'); return; }
+  if(S.balance != null && cryptoGodState.amount > S.balance){
+    errorTone();
+    showToast('❌ Insufficient balance • Available: '+fmtMoney(S.balance,'USD'));
+    return;
+  }
+  cryptoGodState.wallet = wallet;
+  cryptoGodState.processing = true;
+
+  const rate = CRYPTO_RATES[cryptoGodState.crypto];
+  let amountStr;
+  if(rate.symbol === 'BTC') amountStr = cryptoGodState.converted.toFixed(8) + ' BTC';
+  else amountStr = cryptoGodState.converted.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' USDT';
+  document.getElementById('cproc-amount').innerText = amountStr;
+
+  [1,2,3,4].forEach(i=>{
+    const n=document.getElementById('cnode-'+i); if(n)n.classList.remove('active');
+    const l=document.getElementById('clink-'+i); if(l)l.classList.remove('flow','done');
+  });
+  document.getElementById('cnode-1').classList.add('active');
+  document.getElementById('cproc-progress-bar').style.width='0%';
+  document.getElementById('cproc-timer').innerText='40.0s';
+  document.getElementById('crypto-log').innerHTML='';
+  document.getElementById('cproc-stage').innerText='FINDING SELLERS';
+
+  const steps = [
+    { name:'Finding Sellers',      icon:'🔍', detail:'Scanning global liquidity pool • '+rate.network, duration:6600 },
+    { name:'Verifying',            icon:'🛡️', detail:'KYC + AML check • Seller reputation', duration:6600 },
+    { name:'Approving Order',      icon:'📋', detail:'Order matching • Price lock', duration:6600 },
+    { name:'Getting Crypto',       icon:'₿',  detail:'Reserving '+amountStr+' from seller', duration:7000 },
+    { name:'Processing Payment',   icon:'💳', detail:'Card debit • Merchant settlement', duration:6600 },
+    { name:'Finalizing Deal',      icon:'✓',  detail:'Broadcasting to blockchain • Confirmation', duration:6600 }
+  ];
+  document.getElementById('cproc-steps').innerHTML = steps.map((s,i)=>`
+    <div class="proc-step crypto-proc-step" id="cstep-${i}">
+      <div class="proc-step-icon">${s.icon}</div>
+      <div class="proc-step-body">
+        <div class="proc-step-name">${s.name}</div>
+        <div class="proc-step-detail">${s.detail}</div>
+      </div>
+      <div class="proc-step-check">✓</div>
+    </div>
+  `).join('');
+
+  const logLines = [
+    {t:'═══ KEMELE GLOBAL CRYPTO HOST ═══',cls:'dim'},
+    {t:'>> Initiating crypto exchange request…',cls:'req'},
+    {t:'>> Amount: $'+cryptoGodState.amount.toFixed(2)+' USD',cls:'req'},
+    {t:'>> Target: '+rate.symbol+' ('+rate.network+')',cls:'req'},
+    {t:'>> Wallet: '+wallet.slice(0,10)+'…'+wallet.slice(-6),cls:'req'},
+    {t:' ',cls:'dim'},
+    {t:'🔍 Scanning 2,847 active sellers…',cls:'warn'},
+    {t:'✓ 342 sellers matched your order size',cls:'res'},
+    {t:' ',cls:'dim'},
+    {t:'🛡️ Running KYC/AML verification…',cls:'warn'},
+    {t:'✓ Compliance check passed',cls:'res'},
+    {t:' ',cls:'dim'},
+    {t:'📋 Matching best seller price…',cls:'warn'},
+    {t:'✓ Order approved • Rate locked',cls:'res'},
+    {t:' ',cls:'dim'},
+    {t:'₿ Reserving '+amountStr+' from seller pool…',cls:'warn'},
+    {t:'✓ Crypto reserved in escrow',cls:'res'},
+    {t:' ',cls:'dim'},
+    {t:'💳 Processing fiat payment • $'+cryptoGodState.amount.toFixed(2),cls:'warn'},
+    {t:'✓ Payment captured successfully',cls:'res'},
+    {t:' ',cls:'dim'},
+    {t:'🔗 Broadcasting transaction to '+rate.network+'…',cls:'warn'},
+    {t:'✓ TX hash generated',cls:'res'},
+    {t:'✓ Deal finalized successfully',cls:'res'}
+  ];
+
+  showScreen('screen-crypto-processing');
+  const logEl = document.getElementById('crypto-log');
+  let li = 0;
+  const logInterval = setInterval(()=>{
+    if(li >= logLines.length){ clearInterval(logInterval); return; }
+    renderISOTo(logEl, logLines[li]); li++;
+  }, 1500);
+
+  const total = 40000;
+  const t0 = performance.now();
+  const tick = ()=>{
+    const elapsed = performance.now() - t0;
+    const p = Math.min(100, (elapsed/total)*100);
+    document.getElementById('cproc-progress-bar').style.width = p+'%';
+    const remain = Math.max(0, (total-elapsed)/1000);
+    document.getElementById('cproc-timer').innerText = remain.toFixed(1)+'s';
+    if(elapsed < total && S.currentScreen==='screen-crypto-processing') requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+
+  let idx = 0;
+  const runNext = ()=>{
+    if(idx >= steps.length) return;
+    const stepEl = document.getElementById('cstep-'+idx);
+    const nodeEl = document.getElementById('cnode-'+Math.min(idx+1, 4));
+    const linkEl = document.getElementById('clink-'+Math.min(idx+1, 3));
+    if(stepEl) stepEl.classList.add('active');
+    if(nodeEl) nodeEl.classList.add('active');
+    if(linkEl) linkEl.classList.add('flow');
+    document.getElementById('cproc-stage').innerText = steps[idx].name.toUpperCase();
+    setTimeout(()=>{
+      if(stepEl){ stepEl.classList.remove('active'); stepEl.classList.add('done'); }
+      if(linkEl){ linkEl.classList.remove('flow'); linkEl.classList.add('done'); }
+      if(idx+1 < steps.length){
+        const nextNode = document.getElementById('cnode-'+Math.min(idx+2, 4));
+        if(nextNode) nextNode.classList.add('active');
+      }
+      idx++;
+      runNext();
+    }, steps[idx].duration);
+  };
+  runNext();
+
+  setTimeout(()=>{
+    if(S.currentScreen !== 'screen-crypto-processing'){ cryptoGodState.processing=false; return; }
+    cryptoGodState.processing = false;
+    const deducted = cryptoGodState.amount;
+    if(S.balance != null){
+      S.balance = Math.max(0, Math.round((S.balance - deducted)*100)/100);
+    }
+    persist();
+    pushHostLog('REQ','—',`CRYPTO EXCHANGE • $${deducted.toFixed(2)} → ${cryptoGodState.converted.toFixed(2)} ${rate.symbol}`);
+    pushSecAudit('CRYPTO EXCHANGE DEBIT', `${rate.symbol} • $${deducted.toFixed(2)} deducted • New balance $${S.balance.toFixed(2)}`);
+    successTone();
+    showCryptoComplete(deducted);
+  }, 40500);
+}
+
+function showCryptoComplete(deductedAmount){
+  const rate = CRYPTO_RATES[cryptoGodState.crypto];
+  const amountStr = (rate.symbol === 'BTC')
+    ? cryptoGodState.converted.toFixed(8) + ' BTC'
+    : cryptoGodState.converted.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' USDT';
+
+  document.getElementById('crypto-summary').innerHTML = `
+    <div class="crypto-summary-row"><span>FROM</span><span>${fmtMoney(deductedAmount,'USD')}</span></div>
+    <div class="crypto-summary-row"><span>TO</span><span class="accent">${amountStr}</span></div>
+    <div class="crypto-summary-row"><span>NETWORK</span><span>${rate.network}</span></div>
+    <div class="crypto-summary-row"><span>WALLET</span><span style="font-size:9px;">${cryptoGodState.wallet.slice(0,12)}…${cryptoGodState.wallet.slice(-8)}</span></div>
+    <div class="crypto-summary-row"><span>NEW BALANCE</span><span class="accent">${fmtMoney(S.balance,'USD')}</span></div>
+    <div class="crypto-summary-row"><span>STATUS</span><span class="accent">✓ IN PROGRESS</span></div>
+  `;
+
+  showScreen('screen-crypto-complete');
+  spawnCryptoConfetti(90);
+  cryptoGodState.completionTime = Date.now() + 8100*1000;
+  startCryptoCountdown();
+  refreshHome();
+}
+
+function spawnCryptoConfetti(count){
+  const el = document.getElementById('crypto-confetti');
+  el.innerHTML='';
+  const colors = ['#fbbf24','#f59e0b','#7c3aed','#a78bfa','#f472b6','#60a5fa','#34d399'];
+  for(let i=0;i<count;i++){
+    const p=document.createElement('div');
+    p.className='confetti-piece';
+    p.style.left=Math.random()*100+'%';
+    p.style.background=colors[Math.floor(Math.random()*colors.length)];
+    const dur=3+Math.random()*2.5;
+    p.style.animationDuration=dur+'s';
+    p.style.animationDelay=(Math.random()*1)+'s';
+    p.style.width=(6+Math.random()*10)+'px';
+    p.style.height=(6+Math.random()*10)+'px';
+    if(Math.random()>0.5)p.style.borderRadius='50%';
+    el.appendChild(p);
+  }
+  setTimeout(()=>{el.innerHTML='';},8000);
+}
+
+function startCryptoCountdown(){
+  if(cryptoGodState.countdownInterval) clearInterval(cryptoGodState.countdownInterval);
+  const tick = ()=>{
+    const remain = Math.max(0, cryptoGodState.completionTime - Date.now());
+    const total = Math.floor(remain/1000);
+    const h = Math.floor(total/3600);
+    const m = Math.floor((total%3600)/60);
+    const s = total%60;
+    const el = document.getElementById('crypto-countdown');
+    if(el) el.innerText = pad2(h)+':'+pad2(m)+':'+pad2(s);
+    if(remain <= 0 && cryptoGodState.countdownInterval){
+      clearInterval(cryptoGodState.countdownInterval);
+      cryptoGodState.countdownInterval = null;
+    }
+  };
+  tick();
+  cryptoGodState.countdownInterval = setInterval(tick, 1000);
+}
+
+/* ═══════════════════ OUTCOME + BALANCE ═══════════════════ */
+function openOutcomeSheet(){
+  playBeep(); updateOutcomeOptions();
+  document.getElementById('sheet-backdrop').style.display='block';
+  document.getElementById('outcome-sheet').classList.add('active');
+}
+function selectOutcome(status){
+  playBeep();
+  S.forcedStatus = status; S.nextOutcome = status;
+  persist(); closeAllSheets(); updateOutcomeOptions();
+  showToast('Next outcome: ' + (status==='APPROVED'?'✓ SUCCESS':'✕ DECLINED'));
+}
+function updateOutcomeOptions(){
+  const ap = document.getElementById('outcome-opt-approved');
+  const dc = document.getElementById('outcome-opt-declined');
+  if(ap) ap.classList.toggle('selected', S.forcedStatus==='APPROVED');
+  if(dc) dc.classList.toggle('selected', S.forcedStatus==='DECLINED');
+}
+function openBalanceInput(){
+  playBeep();
+  editField('Available Balance (USD)', S.balance!=null ? String(S.balance.toFixed(2)) : '', v => {
+    const n = parseFloat(v);
+    if (isNaN(n) || n < 0) { showToast('Invalid amount'); return; }
+    S.balance = Math.round(n*100)/100;
+    persist();
+    const settingBal = document.getElementById('setting-balance');
+    if (settingBal) settingBal.innerText = fmtMoney(S.balance,'USD');
+    updateCgBalanceChip();
+    showToast('Balance set: '+fmtMoney(S.balance,'USD'));
+  });
+}
+function autoFillDemo(){
+  playBeep();
+  if(!getReal(document.getElementById('amount'))){ setReal(document.getElementById('amount'),'500.00'); renderInput(document.getElementById('amount')); }
+  if(!getReal(document.getElementById('card-number')).replace(/\s/g,'')){
+    setReal(document.getElementById('card-number'),'4'+rand(15));
+    renderInput(document.getElementById('card-number'));
+  }
+  if(getReal(document.getElementById('expiry')).length<4){ setReal(document.getElementById('expiry'),'1228'); renderInput(document.getElementById('expiry')); }
+  if(getReal(document.getElementById('cvv')).length<3){ setReal(document.getElementById('cvv'),'123'); renderInput(document.getElementById('cvv')); }
+  const hn = document.getElementById('holder-name');
+  if(hn && !hn.value) hn.value = 'JOHN A. SMITH';
+  showToast('Demo values auto-filled');
+}
+
+/* ═══════════════════ KEYBOARD ═══════════════════ */
+function focusKb(el){
+  playBeep();
+  document.querySelectorAll('.kb-active').forEach(e=>e.classList.remove('kb-active'));
+  el.classList.add('kb-active');
+  S.activeInput=el;
+  document.getElementById('custom-keyboard').classList.add('active');
+}
+function hideKb(){
+  document.getElementById('custom-keyboard').classList.remove('active');
+  document.querySelectorAll('.kb-active').forEach(e=>e.classList.remove('kb-active'));
+  S.activeInput=null;
+}
+function kbPress(k){
+  playBeep();
+  const el=S.activeInput; if(!el)return;
+  const type=el.getAttribute('data-kb');
+  if(k==='done'){hideKb();el.blur();if(type==='amount'){updateTipSummary(); if(el.id==='cg-amount')updateCryptoCalc();}return}
+  let r=el.getAttribute('data-real')||'';
+  if(k==='clear'){setReal(el,'');renderInput(el);if(type==='amount'){updateTipSummary(); if(el.id==='cg-amount')updateCryptoCalc();}return}
+  if(k==='back'){setReal(el,r.slice(0,-1));renderInput(el);if(type==='amount'){updateTipSummary(); if(el.id==='cg-amount')updateCryptoCalc();}return}
+  const maxLen=parseInt(el.getAttribute('maxlength'))||99;
+  if(type==='amount'){
+    if(k==='.'){ if(!r.includes('.')){ if(r.length===0)r='0'; r+='.'; } }
+    else{ if(r.length>=maxLen)return; r+=k; }
+  } else if(type==='card'){
+    if(k==='.')return;
+    const d=r.replace(/\s/g,''); if(d.length>=16)return; r=d+k;
+  } else if(type==='expiry'){
+    if(k==='.')return;
+    const d=r.replace(/\//g,''); if(d.length>=4)return; r=d+k;
+  } else {
+    if(k==='.')return;
+    if(r.length>=maxLen)return; r+=k;
+  }
+  setReal(el,r); renderInput(el);
+  if(type==='amount'){updateTipSummary(); if(el.id==='cg-amount')updateCryptoCalc();}
+}
+function setReal(el,v){el.setAttribute('data-real',v)}
+function getReal(el){return el.getAttribute('data-real')||''}
+function renderInput(el){
+  const r=getReal(el), t=el.getAttribute('data-kb'), m=el.getAttribute('data-masked')==='true';
+  if(t==='card'){
+    const d=r.replace(/\s/g,'');
+    el.value=d.match(/.{1,4}/g)?.join(' ')||d;
+    updateCardBadge(d);
+  } else if(t==='expiry'){
+    const d=r.replace(/\//g,'');
+    el.value = d.length>=3 ? d.substring(0,2)+'/'+d.substring(2,4) : d;
+  } else if(m){ el.value='*'.repeat(r.length); }
+  else el.value=r;
+}
+function updateCardBadge(digits){
+  const badge = document.getElementById('card-product-badge');
+  const logoEl = document.getElementById('card-product-logo');
+  const nameEl = document.getElementById('card-product-name');
+  const tierEl = document.getElementById('card-product-tier');
+  if(!badge) return;
+  if(digits.length >= 6){
+    const info = cardProductFromPan(digits.padEnd(16, '0'));
+    logoEl.innerText = info.brand;
+    logoEl.style.background = info.cls;
+    nameEl.innerText = info.name;
+    tierEl.innerText = info.tier;
+    badge.classList.add('show');
+  } else if(digits.length >= 4){
+    const b = brandOf(digits);
+    logoEl.innerText = b.brand;
+    logoEl.style.background = b.cls;
+    nameEl.innerText = b.brand + ' CARD';
+    tierEl.innerText = 'ENTER FULL NUMBER FOR TIER';
+    badge.classList.add('show');
+  } else {
+    badge.classList.remove('show');
+  }
+}
+
+/* ═══════════════════ ISO 8583 ═══════════════════ */
+function buildISORequest(opts){
+  const pan = opts.pan||'';
+  const de = [];
+  de.push({n:2, v:pan.substring(0,6)+'*'.repeat(Math.max(0,pan.length-10))+pan.substring(pan.length-4)});
+  de.push({n:3, v:opts.processingCode||'000000'});
+  de.push({n:4, v:String(Math.round((opts.amount||0)*100)).padStart(12,'0')});
+  de.push({n:7, v:nowDE7()});
+  de.push({n:11, v:opts.stan});
+  de.push({n:12, v:nowDE12()});
+  de.push({n:13, v:nowDE13()});
+  de.push({n:22, v:opts.entryMode||'021'});
+  de.push({n:24, v:S.terminal.nii});
+  de.push({n:32, v:S.terminal.acq});
+  de.push({n:37, v:opts.rrn});
+  de.push({n:41, v:S.terminal.tid.substring(0,8).toUpperCase()});
+  de.push({n:42, v:S.terminal.mid});
+  de.push({n:49, v:CURRENCY_ISO[opts.currency||S.currency]||'840'});
+  if(opts.pin) de.push({n:52, v:opts.pin});
+  if(opts.aid) de.push({n:55, v:opts.aid.substring(0,16)});
+  return {mti:opts.mti, de};
+}
+function renderISOTo(el, entry){
+  const line=document.createElement('div');
+  line.className='line';
+  line.innerHTML = `<span class="${entry.cls}">${entry.t}</span>`;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+function pushHostLog(kind, mti, summary){
+  hostLog.unshift({ts:Date.now(),kind,mti,summary});
+  if(hostLog.length>120)hostLog.length=120;
+  persist();
+  if(S.currentScreen==='screen-support')renderSupportLog();
+}
+function pushSecAudit(action, detail){
+  S.securityAudit.unshift({ts:Date.now(),action,detail});
+  if(S.securityAudit.length>60)S.securityAudit.length=60;
+  persist();
+}
+
+/* ═══════════════════ HOME ═══════════════════ */
+function refreshHome(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const txn=history.filter(t=>t.ts>=today.getTime());
+  const appr=txn.filter(t=>t.status==='APPROVED');
+  const decl=txn.filter(t=>t.status==='DECLINED');
+  const fail=txn.filter(t=>t.status==='FAILED');
+  const vol=appr.filter(t=>t.type==='SALE').reduce((s,t)=>s+t.amount,0)
+          - txn.filter(t=>t.type==='REFUND'&&t.status==='APPROVED').reduce((s,t)=>s+t.amount,0);
+  document.getElementById('home-volume').innerText=fmtMoney(vol,'USD');
+  document.getElementById('home-approved').innerText=appr.length;
+  document.getElementById('home-declined').innerText=decl.length;
+  document.getElementById('home-failed').innerText=fail.length;
+  document.getElementById('home-batch').innerText=S.batchNumber;
+}
+
+/* ═══════════════════ SHEETS ═══════════════════ */
+function openCurrencies(){
+  playBeep();
+  document.getElementById('sheet-backdrop').style.display='block';
+  document.getElementById('currency-sheet').classList.add('active');
+}
+function selectCurrency(c){
+  S.currency=c;
+  document.getElementById('selected-currency-label').innerText=c;
+  closeAllSheets();
+}
+function closeAllSheets(){
+  document.getElementById('sheet-backdrop').style.display='none';
+  document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('active'));
+  document.getElementById('confirm-popup').classList.remove('active');
+  document.getElementById('input-popup').classList.remove('active');
+  S.confirmCb=null; S.inputCb=null;
+}
+
+/* ═══════════════════ SALE FLOW ═══════════════════ */
+function validateSale(){
+  playBeep(); hideKb();
+  const amt=getReal(document.getElementById('amount'));
+  if(!amt||isNaN(parseFloat(amt))||parseFloat(amt)<=0){ showToast('⚠ Enter a valid amount'); return; }
+  const pan=getReal(document.getElementById('card-number')).replace(/\s/g,'');
+  if(pan.length<13){ showToast('⚠ Card number must be at least 13 digits'); return; }
+  const exp=getReal(document.getElementById('expiry'));
+  if(exp.length!==4){ showToast('⚠ Enter expiry as MM/YY'); return; }
+  const cvv=getReal(document.getElementById('cvv'));
+  if(cvv.length<3){ showToast('⚠ Enter CVV'); return; }
+
+  const holder = (document.getElementById('holder-name').value||'').trim();
+  const amountVal = parseFloat(amt);
+
+  S.pinTarget = { type:'SALE', amount: amountVal, pan, entryMode:'021', holder };
+  S.pinBuffer = '';
+  approvalState = { step: 1, code1: '', code2: '', requireDouble: amountVal > HIGH_VALUE_THRESHOLD };
+  updatePinUI();
+  showScreen('screen-pin');
+}
+
+/* ═══════════════════ APPROVAL CODE UI ═══════════════════ */
+function updatePinUI(){
+  const disp = document.getElementById('pin-display');
+  disp.innerHTML='';
+  const warnClass = (approvalState.step === 2) ? 'filled warn' : 'filled';
+  for(let i=0;i<6;i++){
+    const d=document.createElement('div');
+    d.className='pin-dot'+(i<S.pinBuffer.length?' '+warnClass:'');
+    disp.appendChild(d);
+  }
+  const pan = S.pinTarget.pan;
+  const info = cardProductFromPan(pan.padEnd(16,'0'));
+  document.getElementById('pin-card').innerText='•••• •••• •••• '+pan.slice(-4);
+  document.getElementById('pin-card-type').innerText=info.name;
+  document.getElementById('pin-amount').innerText=fmtMoney(S.pinTarget.amount, S.currency);
+  document.getElementById('pin-mode').innerText=entryModeLabel(S.pinTarget.entryMode);
+
+  const titleEl = document.getElementById('pin-title');
+  const stepEl = document.getElementById('pin-step-indicator');
+  const instructionEl = document.getElementById('pin-instruction');
+  const warnEl = document.getElementById('pin-warning-banner');
+  const submitBtn = document.getElementById('pin-submit-btn');
+  const footerEl = document.getElementById('pin-footer');
+  const isHighValue = approvalState.requireDouble;
+
+  if(approvalState.step === 1){
+    titleEl.innerText = 'Enter Approval Code';
+    if(isHighValue){
+      stepEl.innerText = 'STEP 1 OF 2';
+      stepEl.className = 'sub step-indicator';
+      warnEl.innerHTML = `
+        <div class="verify-warning">
+          <div class="verify-warning-icon">⚠️</div>
+          <div class="verify-warning-text">
+            <b>HIGH-VALUE TRANSACTION</b><br>
+            Amount exceeds <span class="hi">USD ${HIGH_VALUE_THRESHOLD.toFixed(2)}</span>. Approval code will need to be verified <b>twice</b> before this transaction can proceed.
+          </div>
+        </div>`;
+      instructionEl.innerText = 'Enter approval code (first verification)';
+      instructionEl.style.color = '#b45309';
+    } else {
+      stepEl.innerText = 'STEP 1 OF 1';
+      stepEl.className = 'sub step-indicator';
+      warnEl.innerHTML = '';
+      instructionEl.innerText = 'Enter 4-6 digit approval code';
+      instructionEl.style.color = 'var(--muted)';
+    }
+    submitBtn.innerText = isHighValue ? 'NEXT →' : 'VERIFY';
+    submitBtn.className = 'pin-key wide';
+    footerEl.innerText = 'Approval code is encrypted end-to-end (DUKPT). Never share it with anyone.';
+  } else {
+    titleEl.innerText = 'Re-Enter Approval Code';
+    stepEl.innerText = 'STEP 2 OF 2';
+    stepEl.className = 'sub step-indicator step2';
+    warnEl.innerHTML = `
+      <div class="verify-warning">
+        <div class="verify-warning-icon">🔐</div>
+        <div class="verify-warning-text">
+          <b>RE-VERIFICATION REQUIRED</b><br>
+          Please carefully re-enter the <b>same approval code</b> to verify this high-value transaction of <span class="hi">${fmtMoney(S.pinTarget.amount, S.currency)}</span>.
+        </div>
+      </div>`;
+    instructionEl.innerText = 'Re-enter the same approval code to verify';
+    instructionEl.style.color = '#b45309';
+    submitBtn.innerText = 'VERIFY & PAY';
+    submitBtn.className = 'pin-key wide step2';
+    footerEl.innerText = 'Both approval codes must match to proceed with this high-value transaction.';
+  }
+}
+
+function pinPress(k){
+  playBeep();
+  if(!S.pinTarget)return;
+  if(k==='back'){ S.pinBuffer=S.pinBuffer.slice(0,-1); updatePinUI(); return; }
+  if(S.pinBuffer.length>=6)return;
+  S.pinBuffer+=k;
+  updatePinUI();
+}
+
+function pinSubmit(){
+  playBeep();
+  if(S.pinBuffer.length < 4){ showToast('Enter at least 4 digits'); return; }
+
+  if(approvalState.step === 1){
+    approvalState.code1 = S.pinBuffer;
+    if(approvalState.requireDouble){
+      approvalState.step = 2;
+      S.pinBuffer = '';
+      updatePinUI();
+      showToast('⚠ High-value — verify code again');
+      return;
+    } else {
+      S.pinTarget.pin = 'P' + hex(15);
+      S.pinTarget.approvalCode = approvalState.code1;
+      S.pinTarget.doubleVerified = false;
+      pushSecAudit('APPROVAL CODE', 'Single verify • amount ≤ ' + HIGH_VALUE_THRESHOLD);
+      proceedSale();
+    }
+  } else if(approvalState.step === 2){
+    approvalState.code2 = S.pinBuffer;
+    if(approvalState.code1 !== approvalState.code2){
+      errorTone();
+      showToast('❌ Codes do not match — restart verification');
+      approvalState = { step:1, code1:'', code2:'', requireDouble:true };
+      S.pinBuffer = '';
+      setTimeout(()=>updatePinUI(), 400);
+      return;
+    }
+    S.pinTarget.pin = 'P' + hex(15);
+    S.pinTarget.approvalCode = approvalState.code1;
+    S.pinTarget.doubleVerified = true;
+    pushSecAudit('APPROVAL CODE VERIFIED', 'Double verify • high-value');
+    showToast('✓ Approval code verified');
+    proceedSale();
+  }
+}
+
+function cancelPin(){
+  playBeep();
+  S.pinTarget=null; S.pinBuffer='';
+  approvalState = { step:1, code1:'', code2:'', requireDouble:false };
+  showScreen('screen-sale');
+}
+
+function proceedSale(){
+  const t=S.pinTarget;
+  const stan=rand(6), rrn=rand(12);
+  const info = cardProductFromPan(t.pan.padEnd(16,'0'));
+  runHostTransaction({
+    type:'SALE', mti:'0200', processingCode:'000000',
+    amount:t.amount, pan:t.pan, currency:S.currency,
+    entryMode:t.entryMode, pin:t.pin, stan, rrn,
+    protocol:'ISO 8583 — Online 101.1', aid:'A0000000031010',
+    brand:info.brand, brandProduct:info.name, cardTier:info.tier,
+    holderName: t.holder, doubleVerified: t.doubleVerified
+  });
+}
+
+/* ═══════════════════ CINEMATIC ═══════════════════ */
+const PROC_STEPS = [
+  { name:'Card Data Extraction', icon:'💳', detail:'EMV kernel • AID A0000000031010', duration:1800 },
+  { name:'Approval Code Validation', icon:'🔐', detail:'Verify approval code • DUKPT', duration:1500 },
+  { name:'Host Connection', icon:'🌐', detail:'TLS 1.3 • Acquiring Node', duration:1600 },
+  { name:'Issuer Authorization', icon:'🏦', detail:'Stand-in processing', duration:3200 },
+  { name:'Finalize Response', icon:'✓', detail:'Build DE 39 • Return receipt', duration:1900 }
+];
+
+function buildProcessingSteps(){
+  document.getElementById('proc-steps').innerHTML = PROC_STEPS.map((s,i)=>`
+    <div class="proc-step" id="proc-step-${i}">
+      <div class="proc-step-icon">${s.icon}</div>
+      <div class="proc-step-body">
+        <div class="proc-step-name">${s.name}</div>
+        <div class="proc-step-detail">${s.detail}</div>
+      </div>
+      <div class="proc-step-check">✓</div>
+    </div>
+  `).join('');
+}
+function animateProgress(){
+  const bar=document.getElementById('proc-progress-bar');
+  const timer=document.getElementById('proc-timer');
+  const total=10000;
+  const t0=performance.now();
+  const tick=()=>{
+    const elapsed=performance.now()-t0;
+    const p=Math.min(100,(elapsed/total)*100);
+    bar.style.width=p+'%';
+    const remain=Math.max(0,(total-elapsed)/1000);
+    timer.innerText=remain.toFixed(1)+'s';
+    if(elapsed<total && S.currentScreen==='screen-processing') requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+function runCinematicSteps(){
+  buildProcessingSteps();
+  let idx=0;
+  const advance=()=>{
+    if(idx>=PROC_STEPS.length)return;
+    const step=PROC_STEPS[idx];
+    const stepEl=document.getElementById('proc-step-'+idx);
+    const nodeEl=document.getElementById('node-'+(idx+1));
+    const linkEl=document.getElementById('link-'+idx);
+    if(stepEl)stepEl.classList.add('active');
+    if(nodeEl)nodeEl.classList.add('active');
+    if(linkEl)linkEl.classList.add('flow');
+    document.getElementById('proc-stage').innerText=step.name.toUpperCase();
+    setTimeout(()=>{
+      if(stepEl){stepEl.classList.remove('active');stepEl.classList.add('done');}
+      if(linkEl){linkEl.classList.remove('flow');linkEl.classList.add('done');}
+      if(idx+1 < PROC_STEPS.length){
+        const nextNode=document.getElementById('node-'+(idx+2));
+        if(nextNode)nextNode.classList.add('active');
+      }
+      idx++;
+      advance();
+    }, step.duration);
+  };
+  advance();
+}
+
+function runHostTransaction(o){
+  S.isoLog=[];
+  document.getElementById('iso-log').innerHTML='';
+  document.getElementById('proc-stage').innerText='INITIALIZING';
+  document.getElementById('proc-amount').innerText = o.amount>0 ? fmtMoney(o.amount,o.currency) : 'BALANCE QUERY';
+  document.getElementById('proc-timer').innerText='10.0s';
+  [1,2,3,4].forEach(i=>{
+    const n=document.getElementById('node-'+i); if(n)n.classList.remove('active');
+    const l=document.getElementById('link-'+i); if(l)l.classList.remove('flow','done');
+  });
+  document.getElementById('node-1').classList.add('active');
+  document.getElementById('proc-progress-bar').style.width='0%';
+  showScreen('screen-processing');
+
+  const logEl=document.getElementById('iso-log');
+  const req = buildISORequest({
+    mti:o.mti, pan:o.pan, amount:o.amount, currency:o.currency,
+    processingCode:o.processingCode, entryMode:o.entryMode, pin:o.pin,
+    stan:o.stan, rrn:o.rrn, aid:o.aid
+  });
+
+  const ptype = protocolType(o.protocol);
+  const verifLabel = o.doubleVerified ? 'DOUBLE VERIFIED ✓✓' : 'SINGLE VERIFIED ✓';
+  const lines=[
+    {t:'═══ OUTBOUND ───',cls:'dim'},
+    {t:`>> PROTOCOL TYPE: ${ptype}`,cls:'req'},
+    {t:`>> ${o.protocol}`,cls:'req'},
+    {t:`>> APPROVAL MODE: ${o.doubleVerified ? 'HIGH-VALUE DOUBLE' : 'STANDARD'}`,cls:'req'},
+    {t:`>> MTI: ${req.mti} (Financial Request)`,cls:'req'},
+    ...req.de.map(d=>{
+      const names={2:'PAN',3:'Processing Code',4:'Amount',7:'Transmission D/T',11:'STAN',12:'Local Time',13:'Local Date',22:'POS Entry Mode',24:'NII',32:'Acquiring Inst ID',37:'RRN',41:'Terminal ID',42:'Merchant ID',49:'Currency Code',52:'PIN Block',55:'ICC Data'};
+      return {t:`>> DE ${String(d.n).padStart(2,' ')}  ${(names[d.n]||'').padEnd(20,' ')} = ${d.v}`,cls:'req'};
+    }),
+    {t:' ',cls:'dim'},
+    {t:'⏳ Awaiting host response…',cls:'warn'}
+  ];
+
+  let i=0;
+  const step=()=>{
+    if(i<lines.length){ renderISOTo(logEl,lines[i]); i++; setTimeout(step,180+Math.random()*120); }
+    else setTimeout(finalizeHost, 600);
+  };
+  setTimeout(step, 800);
+
+  animateProgress();
+  if(S.settings.cinematic) runCinematicSteps();
+
+  const totalAnim = S.settings.cinematic ? 10000 : 3000;
+  setTimeout(()=>{ finalizeHost(); }, totalAnim + 200);
+
+  let done=false;
+  function finalizeHost(){
+    if(done)return; done=true;
+    pushHostLog('REQ',o.mti,`${o.type} ${o.amount>0?fmtMoney(o.amount,o.currency):'—'} • ${ptype} • ${verifLabel} • PAN ****${o.pan.slice(-4)}`);
+
+    let insufficient = false;
+    if(o.type==='SALE' && S.balance != null && o.amount > S.balance){ insufficient = true; }
+
+    let respCode, respText, status;
+    if(insufficient){ respCode='51'; respText='INSUFFICIENT FUNDS'; status='DECLINED'; }
+    else if(S.forcedStatus==='APPROVED'){ respCode='00'; respText='APPROVED'; status='APPROVED'; }
+    else if(S.forcedStatus==='DECLINED'){ respCode='05'; respText='DO NOT HONOR'; status='DECLINED'; }
+    else { respCode='96'; respText='SYSTEM MALFUNCTION'; status='FAILED'; }
+
+    const authCode = status==='APPROVED' ? rand(6) : '------';
+    const resLines=[
+      {t:' ',cls:'dim'},
+      {t:'═══ INBOUND ───',cls:'dim'},
+      {t:`<< MTI: 0210 (${status==='APPROVED'?'Approved':status==='DECLINED'?'Declined':'Failed'})`,cls:status==='APPROVED'?'res':'err'},
+      {t:`<< DE 39 Response Code     = ${respCode}  (${respText})`,cls:status==='APPROVED'?'res':'err'},
+      {t:`<< DE 38 Approval Code     = ${authCode}`,cls:'res'},
+      {t:`<< DE 37 RRN               = ${o.rrn}`,cls:'res'},
+      {t:`<< DE 11 STAN              = ${o.stan}`,cls:'res'},
+      {t:`<< APPROVAL VERIFICATION   = ${verifLabel}`,cls:'res'},
+      {t:' ',cls:'dim'},
+      {t: status==='APPROVED' ? '✓ TRANSACTION APPROVED' : status==='DECLINED' ? '✕ TRANSACTION DECLINED' : '! HOST FAILURE', cls:status==='APPROVED'?'res':'err'}
+    ];
+
+    let j=0;
+    const step2=()=>{
+      if(j<resLines.length){ renderISOTo(logEl,resLines[j]); j++; setTimeout(step2,90); }
+      else {
+        pushHostLog('RES','0210',`RC=${respCode} • ${status} • ${verifLabel}`);
+        if(status==='APPROVED' && o.type==='SALE' && S.balance != null){
+          S.balance = Math.max(0, Math.round((S.balance - o.amount)*100)/100);
+          const settingBal = document.getElementById('setting-balance');
+          if (settingBal) settingBal.innerText = fmtMoney(S.balance,'USD');
+        }
+        const rec = {
+          id:'TXN'+Date.now(), ts:Date.now(), type:o.type, status:status,
+          amount:o.amount, currency:o.currency,
+          cardLast4:o.pan.slice(-4), cardBrand:o.brand||'VISA', cardProduct:o.brandProduct||'VISA CLASSIC DEBIT', cardTier:o.cardTier||'STANDARD TIER',
+          sender: o.holderName || senderFor(o.pan),
+          protocol:o.protocol, protocolType: ptype,
+          entryMode:entryModeLabel(o.entryMode), entryModeCode:o.entryMode,
+          stan:o.stan, rrn:o.rrn, trn:rand(12), batch:S.batchNumber,
+          authCode:authCode, respCode:respCode, respText:respText, mti:o.mti,
+          aid:o.aid||'A0000000031010', tvrtsi:hex(10)+' / '+hex(4),
+          pinVerified: !!o.pin, _origin:'entry',
+          doubleVerified: !!o.doubleVerified, balanceAfter: S.balance
+        };
+        history.unshift(rec);
+        if(history.length>250)history.length=250;
+        persist();
+        refreshHome();
+        S.lastTxn=rec;
+        if(status==='APPROVED')successTone(); else errorTone();
+        showSuccessScreen(rec);
+      }
+    };
+    step2();
+  }
+}
+
+/* ═══════════════════ SUCCESS SCREEN ═══════════════════ */
+function showSuccessScreen(rec){
+  const isApproved = rec.status==='APPROVED';
+  const isDeclined = rec.status==='DECLINED';
+  const check = document.getElementById('success-check');
+  check.classList.remove('declined','failed','info');
+  const svg = document.getElementById('success-svg');
+  if(isApproved) svg.innerHTML='<path d="M14 27 L22 35 L38 18"/>';
+  else if(isDeclined){ check.classList.add('declined'); svg.innerHTML='<path d="M16 16 L36 36 M36 16 L16 36"/>'; }
+  else { check.classList.add('failed'); svg.innerHTML='<path d="M26 12 L26 32 M26 40 L26 42"/>'; }
+
+  const titles = {
+    APPROVED: rec.type==='BALANCE'?'Balance Retrieved':rec.type==='REFUND'?'Refund Approved':rec.type==='PREAUTH'?'Pre-Auth Approved':rec.type==='TIP'?'Tip Adjusted':'Payment Approved',
+    DECLINED: rec.respText==='INSUFFICIENT FUNDS' ? 'Insufficient Funds' : 'Transaction Declined',
+    FAILED:'Host Failure'
+  };
+  document.getElementById('success-title').innerText = titles[rec.status];
+  const sub = document.getElementById('success-subtitle');
+  sub.classList.remove('declined','failed');
+  if(isApproved) sub.innerText = (rec.doubleVerified ? 'DOUBLE VERIFIED • RC 00' : 'AUTHORIZATION SUCCESSFUL • RC 00');
+  else if(isDeclined){ sub.classList.add('declined'); sub.innerText=`DECLINED • RC ${rec.respCode} • ${rec.respText}`; }
+  else { sub.classList.add('failed'); sub.innerText=`FAILED • RC ${rec.respCode} • ${rec.respText}`; }
+
+  document.getElementById('success-amt-label').innerText= isApproved ? 'Amount Charged' : 'Attempted Amount';
+  document.getElementById('success-amount').innerText=fmtMoney(rec.amount,rec.currency);
+
+  const rows = [
+    {l:'AUTH CODE', v:rec.authCode||'——', mono:true},
+    {l:'RRN', v:rec.rrn, mono:true},
+    {l:'STAN', v:rec.stan, mono:true},
+    {l:'CARD', v:'•••• '+rec.cardLast4, mono:true},
+    {l:'CARD TYPE', v:rec.cardProduct||rec.cardBrand||'VISA CLASSIC'},
+    {l:'PROTOCOL', v:rec.protocolType||'ONLINE'},
+    {l:'VERIFICATION', v: rec.doubleVerified ? 'DOUBLE ✓✓' : 'SINGLE ✓'},
+    {l:'TIME', v:fmtDT(rec.ts).slice(-8)}
+  ];
+  document.getElementById('success-details').innerHTML = rows.map(r=>`
+    <div class="success-detail">
+      <div class="success-detail-label">${r.l}</div>
+      <div class="success-detail-value ${r.mono?'mono':''}">${r.v}</div>
+    </div>
+  `).join('');
+
+  const cryptoBtn = document.querySelector('.crypto-god-btn');
+  if(cryptoBtn){
+    if(isApproved){ cryptoBtn.style.display='flex'; cryptoGodState.lastTxnAmount = rec.amount; }
+    else cryptoBtn.style.display='none';
+  }
+
+  showScreen('screen-success');
+  if(isApproved) spawnConfetti(80);
+}
+
+function spawnConfetti(count){
+  const el=document.getElementById('confetti');
+  el.innerHTML='';
+  if(count<=0)return;
+  const colors=['#10b981','#5eead4','#fbbf24','#f472b6','#60a5fa','#a78bfa','#34d399'];
+  for(let i=0;i<count;i++){
+    const p=document.createElement('div');
+    p.className='confetti-piece';
+    p.style.left=Math.random()*100+'%';
+    p.style.background=colors[Math.floor(Math.random()*colors.length)];
+    const dur=2.5+Math.random()*2;
+    p.style.animationDuration=dur+'s';
+    p.style.animationDelay=(Math.random()*0.8)+'s';
+    p.style.width=(6+Math.random()*8)+'px';
+    p.style.height=(6+Math.random()*8)+'px';
+    if(Math.random()>0.5)p.style.borderRadius='50%';
+    el.appendChild(p);
+  }
+  setTimeout(()=>{el.innerHTML='';},5000);
+}
+
+/* ═══════════════════ RECEIPT ═══════════════════ */
+function showReceipt(){ playBeep(); if(!S.lastTxn)return; renderReceipt(S.lastTxn); showScreen('screen-receipt'); }
+function renderQR(seed){
+  const svg=document.getElementById('qr-svg');
+  const N=29;
+  let s=0;
+  for(const c of String(seed)) s=(s*31+parseInt(c,10))>>>0;
+  let cells='';
+  const finder=(ox,oy)=>{
+    for(let y=0;y<7;y++)for(let x=0;x<7;x++){
+      const edge=(x===0||x===6||y===0||y===6);
+      const inner=(x>=2&&x<=4&&y>=2&&y<=4);
+      if(edge||inner) cells+=`<rect x="${ox+x}" y="${oy+y}" width="1" height="1" fill="#0f172a"/>`;
+    }
+  };
+  let state=s;
+  const rnd=()=>{state=(state*1664525+1013904223)>>>0;return state/4294967296;};
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const inTL=(x<8&&y<8), inTR=(x>N-9&&y<8), inBL=(x<8&&y>N-9);
+    if(inTL||inTR||inBL)continue;
+    if(rnd()>0.52) cells+=`<rect x="${x}" y="${y}" width="1" height="1" fill="#0f172a"/>`;
+  }
+  finder(0,0); finder(N-7,0); finder(0,N-7);
+  svg.innerHTML=`<rect width="29" height="29" fill="#fff"/>${cells}`;
+}
+function renderReceipt(rec){
+  document.getElementById('rcpt-date').innerText=fmtFullDT(rec.ts);
+  document.getElementById('rcpt-batch').innerText=rec.batch;
+  document.getElementById('rcpt-invoice').innerText=rec.trn.slice(0,6);
+  document.getElementById('rcpt-stan').innerText=rec.stan;
+  document.getElementById('rcpt-trn').innerText=rec.trn;
+  document.getElementById('rcpt-rrn').innerText=rec.rrn;
+  document.getElementById('rcpt-auth').innerText=rec.authCode;
+  document.getElementById('rcpt-resp').innerText=rec.respCode+' — '+rec.respText;
+  document.getElementById('rcpt-proto').innerText=rec.protocol||'ISO 8583 — Online 101.1';
+  document.getElementById('rcpt-proto-type').innerText=rec.protocolType||'ONLINE';
+  document.getElementById('rcpt-mti').innerText=rec.mti||'0200';
+  document.getElementById('rcpt-host').innerText=(rec.protocolType==='OFFLINE')?'STORE & FORWARD':'JAKAR-HOST-PRIMARY';
+  document.getElementById('rcpt-brand').innerText=(rec.cardBrand||'VISA')+' — '+(rec.cardTier||'STANDARD');
+  document.getElementById('rcpt-cardtype').innerText=rec.cardProduct||'VISA CLASSIC DEBIT';
+  document.getElementById('rcpt-sender').innerText=rec.sender||'—';
+  document.getElementById('rcpt-card').innerText='•••• •••• •••• '+rec.cardLast4;
+  document.getElementById('rcpt-entry').innerText=rec.entryMode||'MANUAL KEYED';
+  document.getElementById('rcpt-pin').innerText=rec.pinVerified?'VERIFIED':'NOT VERIFIED';
+  document.getElementById('rcpt-verify').innerText = rec.doubleVerified ? 'DOUBLE ✓✓' : 'SINGLE ✓';
+  document.getElementById('rcpt-aid').innerText=rec.aid;
+  document.getElementById('rcpt-tvr-tsi').innerText=rec.tvrtsi;
+  document.getElementById('rcpt-tid').innerText=S.terminal.tid;
+  document.getElementById('rcpt-mid').innerText=S.terminal.mid;
+  renderQR(rec.id+rec.rrn+rec.stan);
+
+  const badge=document.getElementById('rcpt-status-badge');
+  const dyn=document.getElementById('rcpt-dynamic-content');
+  const authB=document.getElementById('rcpt-auth-bottom');
+
+  badge.className='rcpt-badge';
+  if(rec.status==='APPROVED'){
+    badge.innerText='*** SALE APPROVED ***';
+    authB.innerText=rec.authCode;
+    dyn.innerHTML=`<div class="rcpt-amount-box">
+      <div style="font-size:10px;color:#64748b;margin-bottom:2px;">TOTAL SALE AMOUNT</div>
+      <div class="rcpt-amount-big">${fmtMoney(rec.amount,rec.currency)}</div></div>
+      ${rec.doubleVerified ? '<div class="rcpt-center" style="font-size:9px;color:#059669;font-weight:800;letter-spacing:.5px;">⚡ HIGH-VALUE • DOUBLE VERIFIED</div>' : ''}`;
+  } else if(rec.status==='DECLINED'){
+    badge.classList.add('declined');
+    const isInsuf = rec.respText==='INSUFFICIENT FUNDS';
+    badge.innerText='*** '+(isInsuf?'INSUFFICIENT FUNDS':'DECLINED')+' ***';
+    authB.innerText='DECLINED';
+    dyn.innerHTML=`
+      <div class="rcpt-amount-box">
+        <div style="font-size:10px;color:#64748b;margin-bottom:2px;">ATTEMPTED AMOUNT</div>
+        <div class="rcpt-amount-big" style="color:#ef4444;">${fmtMoney(rec.amount,rec.currency)}</div>
+      </div>
+      <div class="rcpt-divider"></div>
+      <div class="rcpt-row" style="justify-content:center;color:#ef4444;font-weight:800;font-size:11px;margin-top:4px;">ERROR CODE: ${rec.respCode}</div>
+      <div class="rcpt-row" style="justify-content:center;color:#64748b;font-size:9px;">RESP: ${rec.respText}</div>
+      ${isInsuf?`<div class="rcpt-row" style="justify-content:center;color:#64748b;font-size:9px;">AVAILABLE BALANCE: ${fmtMoney(rec.balanceAfter||0,rec.currency)}</div>`:''}`;
+  } else {
+    badge.classList.add('failed');
+    badge.innerText='*** FAILED ***';
+    authB.innerText='FAILED';
+    dyn.innerHTML=`
+      <div class="rcpt-amount-box"><div style="font-size:10px;color:#64748b;margin-bottom:2px;">ATTEMPTED AMOUNT</div>
+      <div class="rcpt-amount-big" style="color:#b45309;">${fmtMoney(rec.amount,rec.currency)}</div></div>
+      <div class="rcpt-row" style="justify-content:center;color:#b45309;font-weight:800;font-size:11px;margin-top:4px;">ERROR CODE: ${rec.respCode}</div>`;
+  }
+}
+function printReceipt(){ playBeep(); if(S.lastTxn){ showToast('Sending to printer…'); setTimeout(()=>showToast('Printed • '+S.lastTxn.id),700); } }
+function emailReceipt(){ playBeep(); if(S.lastTxn){ showToast('Email receipt queued'); setTimeout(()=>showToast('Sent'),900); } }
+function shareReceipt(){
+  playBeep();
+  const rec=S.lastTxn; if(!rec)return;
+  const text=`JakarPOS Receipt\nTXN ${rec.id}\nCARD ${rec.cardProduct||rec.cardBrand}\nPROTOCOL ${rec.protocolType||'ONLINE'} — ${rec.protocol}\nVERIFICATION ${rec.doubleVerified?'DOUBLE':'SINGLE'}\nSTAN ${rec.stan}\nRRN ${rec.rrn}\nAUTH ${rec.authCode}\nAMOUNT ${fmtMoney(rec.amount,rec.currency)}\nSTATUS ${rec.status}`;
+  if(navigator.share){ navigator.share({title:'JakarPOS Receipt', text}).catch(()=>{}); }
+  else if(navigator.clipboard){ navigator.clipboard.writeText(text); showToast('Receipt copied'); }
+  else showToast('Share not supported');
+}
+function resetSale(){
+  playBeep();
+  ['amount','card-number','expiry','cvv','holder-name'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(el.getAttribute('data-kb')){ setReal(el,''); renderInput(el); }
+    else el.value='';
+  });
+  document.getElementById('card-product-badge').classList.remove('show');
+  S.pinTarget=null;S.pinBuffer='';
+  approvalState = { step:1, code1:'', code2:'', requireDouble:false };
+  goTo('screen-home');
+}
+
+/* ═══════════════════ REFUND ═══════════════════ */
+function setRefundMode(m){
+  S.refundFilter=m;
+  document.querySelectorAll('#screen-refund .chip').forEach(c=>{ c.classList.toggle('active', c.getAttribute('data-rm')===m); });
+  renderRefundList(document.getElementById('refund-search').value);
+}
+function renderRefundList(q){
+  const list=document.getElementById('refund-list');
+  if(!list)return;
+  let items=history.filter(t=>t.type==='SALE');
+  if(S.refundFilter==='APPROVED') items=items.filter(t=>t.status==='APPROVED');
+  if(S.refundFilter==='REFUNDED') items=items.filter(t=>t.status==='REFUNDED');
+  const query=(q||'').trim().toLowerCase();
+  if(query) items=items.filter(t =>
+    (t.stan||'').includes(query) || (t.rrn||'').includes(query) ||
+    (t.cardLast4||'').includes(query) || (t.sender||'').toLowerCase().includes(query));
+  items=items.slice(0,60);
+  if(!items.length){ list.innerHTML='<div class="empty-state">No matching transactions.</div>'; return; }
+  list.innerHTML=items.map(t=>{
+    const refunded=t.status==='REFUNDED';
+    const canRefund=t.status==='APPROVED';
+    const bg=refunded?'#e9d5ff':canRefund?'#dcfce7':'#fee2e2';
+    const fg=refunded?'#7c3aed':canRefund?'#16a34a':'#dc2626';
+    return `<div class="hist-item" onclick="playBeep();openRefundDetail('${t.id}')">
+      <div class="hist-icon" style="background:${bg};color:${fg};">${refunded?'↩':canRefund?'💳':'✕'}</div>
+      <div class="hist-main"><div class="hist-title">${t.sender||'—'} • ••••${t.cardLast4}</div>
+      <div class="hist-sub">${fmtDT(t.ts)} • STAN ${t.stan}</div></div>
+      <div class="hist-right"><div class="hist-amt">${fmtMoney(t.amount,t.currency)}</div>
+      <div class="hist-status" style="color:${fg};">${t.status}</div></div>
+    </div>`;
+  }).join('');
+}
+function openRefundDetail(id){
+  const rec=history.find(t=>t.id===id);
+  if(!rec)return;
+  if(rec.status==='REFUNDED'){ showToast('Already refunded'); return; }
+  if(rec.status!=='APPROVED'){ showToast('Only approved sales can be refunded'); return; }
+  openConfirm('Confirm Refund', `Refund ${fmtMoney(rec.amount,rec.currency)} to card ••••${rec.cardLast4}?`, ()=>executeRefund(rec));
+}
+function executeRefund(orig){
+  const stan=rand(6), rrn=rand(12);
+  const o=history.find(t=>t.id===orig.id);
+  if(o){ o.status='REFUNDED'; persist(); }
+  const info = cardProductFromPan((orig.cardLast4||'0000').padStart(16,'0'));
+  runHostTransaction({
+    type:'REFUND', mti:'0200', processingCode:'200000',
+    amount:orig.amount, pan:'4'+(orig.cardLast4||'').padStart(15,'0'),
+    currency:orig.currency, entryMode:'021', pin:'P'+hex(15), stan, rrn,
+    protocol:orig.protocol, aid:orig.aid,
+    brand:orig.cardBrand||info.brand, brandProduct:orig.cardProduct||info.name, cardTier:orig.cardTier||info.tier,
+    doubleVerified: false
+  });
+}
+
+/* ═══════════════════ PREAUTH / TIP / BALANCE ═══════════════════ */
+function startPreAuth(){
+  playBeep(); hideKb();
+  const amt=getReal(document.getElementById('preauth-amount'));
+  if(!amt||isNaN(parseFloat(amt))||parseFloat(amt)<=0){ showToast('Enter valid amount'); return; }
+  const pan=getReal(document.getElementById('preauth-card')).replace(/\s/g,'');
+  if(pan.length<13){ showToast('Enter valid card'); return; }
+  const stan=rand(6), rrn=rand(12);
+  const info = cardProductFromPan(pan.padEnd(16,'0'));
+  runHostTransaction({
+    type:'PREAUTH', mti:'0100', processingCode:'000000',
+    amount:parseFloat(amt), pan, currency:S.currency,
+    entryMode:'022', pin:'P'+hex(15), stan, rrn,
+    protocol:'ISO 8583 — Online 101.1', aid:'A0000000031010',
+    brand:info.brand, brandProduct:info.name, cardTier:info.tier, doubleVerified: false
+  });
+}
+function setTipPct(pct){
+  const base=parseFloat(getReal(document.getElementById('tip-base'))||'0');
+  const tip=(base*pct/100).toFixed(2);
+  setReal(document.getElementById('tip-amount'),tip);
+  renderInput(document.getElementById('tip-amount'));
+  updateTipSummary();
+}
+function updateTipSummary(){
+  const base=parseFloat(getReal(document.getElementById('tip-base'))||'0');
+  const tip=parseFloat(getReal(document.getElementById('tip-amount'))||'0');
+  document.getElementById('tip-show-base').innerText=fmtMoney(base,'USD');
+  document.getElementById('tip-show-tip').innerText=fmtMoney(tip,'USD');
+  document.getElementById('tip-show-total').innerText=fmtMoney(base+tip,'USD');
+}
+function startTipAdjust(){
+  playBeep(); hideKb();
+  const tip=parseFloat(getReal(document.getElementById('tip-amount'))||'0');
+  if(!tip||tip<=0){ showToast('Enter a tip amount'); return; }
+  const stan=rand(6), rrn=rand(12);
+  runHostTransaction({
+    type:'TIP', mti:'0200', processingCode:'000000',
+    amount:tip, pan:'4'+rand(12)+'4821', currency:S.currency,
+    entryMode:'021', pin:'P'+hex(15), stan, rrn,
+    protocol:'ISO 8583 — Online 101.1', aid:'A0000000031010',
+    brand:'VISA', brandProduct:'VISA CREDIT', cardTier:'CREDIT TIER', doubleVerified: false
+  });
+}
+function startBalance(){
+  playBeep(); hideKb();
+  const pan=getReal(document.getElementById('bal-card')).replace(/\s/g,'');
+  if(pan.length<13){ showToast('Enter valid card'); return; }
+  const pin=getReal(document.getElementById('bal-pin'));
+  if(pin.length<4){ showToast('Enter 4-digit approval code'); return; }
+  const stan=rand(6), rrn=rand(12);
+  const info = cardProductFromPan(pan.padEnd(16,'0'));
+  runHostTransaction({
+    type:'BALANCE', mti:'0200', processingCode:'310000',
+    amount:0, pan, currency:S.currency,
+    entryMode:'021', pin:'P'+hex(15), stan, rrn,
+    protocol:'ISO 8583 — Online 101.1', aid:'A0000000031010',
+    brand:info.brand, brandProduct:info.name, cardTier:info.tier, doubleVerified: false
+  });
+}
+
+/* ═══════════════════ HISTORY ═══════════════════ */
+const HF={status:'ALL',range:'ALL',sort:'NEWEST',query:''};
+const SORTS=['NEWEST','OLDEST','HIGH','LOW'];
+const SORT_LBL={NEWEST:'⇅ New',OLDEST:'⇅ Old',HIGH:'⇅ High',LOW:'⇅ Low'};
+function setHistFilter(kind,val){
+  HF[kind]=val;
+  if(kind==='status') document.querySelectorAll('#hist-status-chips .chip').forEach(c=>c.classList.toggle('active',c.getAttribute('data-st')===val));
+  if(kind==='range') document.querySelectorAll('#hist-range-chips .chip').forEach(c=>c.classList.toggle('active',c.getAttribute('data-rg')===val));
+  renderHistory();
+}
+function onHistSearch(v){ HF.query=v||''; renderHistory(); }
+function cycleHistSort(){
+  const i=SORTS.indexOf(HF.sort);
+  HF.sort=SORTS[(i+1)%SORTS.length];
+  document.getElementById('hist-sort-btn').innerText=SORT_LBL[HF.sort];
+  renderHistory();
+}
+function renderHistory(){
+  const list=document.getElementById('hist-list');
+  if(!list)return;
+  let items=history.slice();
+  if(HF.status!=='ALL') items=items.filter(t=>t.status===HF.status);
+  const now=Date.now();
+  if(HF.range==='TODAY'){ const s=new Date();s.setHours(0,0,0,0);items=items.filter(t=>t.ts>=s.getTime()); }
+  else if(HF.range==='7D') items=items.filter(t=>t.ts>=now-7*86400000);
+  else if(HF.range==='30D') items=items.filter(t=>t.ts>=now-30*86400000);
+  const q=(HF.query||'').trim().toLowerCase();
+  if(q) items=items.filter(t =>
+    (t.sender||'').toLowerCase().includes(q) || (t.cardLast4||'').includes(q) ||
+    (t.stan||'').includes(q) || (t.rrn||'').includes(q));
+  if(HF.sort==='NEWEST') items.sort((a,b)=>b.ts-a.ts);
+  else if(HF.sort==='OLDEST') items.sort((a,b)=>a.ts-b.ts);
+  else if(HF.sort==='HIGH') items.sort((a,b)=>b.amount-a.amount);
+  else if(HF.sort==='LOW') items.sort((a,b)=>a.amount-b.amount);
+
+  document.getElementById('hist-count').innerText=items.length+' TXNS';
+  if(!items.length){ list.innerHTML='<div class="empty-state">No transactions match the filters.</div>'; return; }
+
+  list.innerHTML=items.map(t=>{
+    let bg,fg,icon;
+    if(t.status==='APPROVED'){ bg='#dcfce7';fg='#16a34a';icon=t.type==='BALANCE'?'🔍':t.type==='REFUND'?'↩':t.type==='TIP'?'💵':'✓'; }
+    else if(t.status==='DECLINED'){ bg='#fee2e2';fg='#ef4444';icon='✕'; }
+    else if(t.status==='REFUNDED'){ bg='#e9d5ff';fg='#7c3aed';icon='↩'; }
+    else { bg='#fef3c7';fg='#b45309';icon='!'; }
+    const amt = t.type==='BALANCE' ? 'BAL INQ' : fmtMoney(t.amount,t.currency);
+    const title = t.type==='BALANCE'?'Balance Inquiry':t.type==='REFUND'?'Refund':t.type==='PREAUTH'?'Pre-Auth':t.type==='TIP'?'Tip Adjust':'Card Sale';
+    const isInsuf = t.respText==='INSUFFICIENT FUNDS';
+    const protoMark = (t.protocolType==='OFFLINE') ? ' 📴' : ' 🌐';
+    const vMark = t.doubleVerified ? ' ✓✓' : '';
+    return `<div class="hist-item" onclick="playBeep();openTxnDetail('${t.id}')">
+      <div class="hist-icon" style="background:${bg};color:${fg};">${icon}</div>
+      <div class="hist-main"><div class="hist-title">${title} • ${t.sender||'—'}${vMark}</div>
+      <div class="hist-sub">${fmtDT(t.ts)}${protoMark} • ${t.cardProduct||''}</div></div>
+      <div class="hist-right"><div class="hist-amt">${amt}</div>
+      <div class="hist-status" style="color:${fg};">${isInsuf?'INSUF FND':t.status}</div></div>
+    </div>`;
+  }).join('');
+}
+function openTxnDetail(id){
+  const rec=history.find(t=>t.id===id);
+  if(!rec)return;
+  S.lastTxn=rec; rec._origin='history';
+  renderReceipt(rec); showScreen('screen-receipt');
+}
+
+/* ═══════════════════ BATCH ═══════════════════ */
+function computeBatch(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const txn=history.filter(t=>t.ts>=today.getTime());
+  const appr=txn.filter(t=>t.status==='APPROVED'&&t.type==='SALE');
+  const refund=txn.filter(t=>t.status==='APPROVED'&&t.type==='REFUND');
+  const decl=txn.filter(t=>t.status==='DECLINED');
+  const fail=txn.filter(t=>t.status==='FAILED');
+  const gross=appr.reduce((s,t)=>s+t.amount,0);
+  const refundTotal=refund.reduce((s,t)=>s+t.amount,0);
+  const net=gross-refundTotal;
+  const fee=net*0.0175;
+  const payable=net-fee;
+  return {appr,refund,decl,fail,gross,refundTotal,net,fee,payable};
+}
+function renderBatch(){
+  const b=computeBatch();
+  document.getElementById('batch-num').innerText=S.batchNumber;
+  document.getElementById('batch-open-time').innerText='Opened '+fmtDT(S.batchOpenTs);
+  document.getElementById('batch-status-sub').innerText=S.batchStatus;
+  document.getElementById('batch-approved').innerText=b.appr.length;
+  document.getElementById('batch-approved-amt').innerText=fmtMoney(b.gross,'USD');
+  document.getElementById('batch-bad').innerText=b.decl.length+b.fail.length;
+  document.getElementById('batch-gross').innerText=fmtMoney(b.gross,'USD');
+  document.getElementById('batch-refund').innerText=fmtMoney(b.refundTotal,'USD');
+  document.getElementById('batch-net').innerText=fmtMoney(b.net,'USD');
+  document.getElementById('batch-fee').innerText=fmtMoney(b.fee,'USD');
+  document.getElementById('batch-payable').innerText=fmtMoney(b.payable,'USD');
+  document.getElementById('batch-log').innerHTML=settlementLog.length
+    ? settlementLog.map(l=>`<div class="setting-row" style="padding:9px 11px;">
+        <div><div class="setting-title">Batch ${l.batch}</div><div class="setting-sub">${fmtDT(l.ts)} • ${l.count} txn(s)</div></div>
+        <div style="font-size:11.5px;font-weight:900;color:#059669;">${fmtMoney(l.amount,'USD')}</div></div>`).join('')
+    : '<div class="empty-state" style="padding:16px 10px;">No settlements recorded.</div>';
+}
+function askSettleBatch(){
+  playBeep();
+  const b=computeBatch();
+  if(!b.appr.length){ showToast('Nothing to settle'); return; }
+  openConfirm('Close Batch & Settle', `Settle ${b.appr.length} sale(s) totalling ${fmtMoney(b.net,'USD')}?`, ()=>{
+    settlementLog.unshift({ts:Date.now(),batch:S.batchNumber,amount:b.payable,count:b.appr.length});
+    S.batchNumber=String(parseInt(S.batchNumber,10)+1).padStart(6,'0');
+    persist();
+    successTone();
+    showToast('Batch settled • '+fmtMoney(b.payable,'USD'));
+    renderBatch();
+    goTo('screen-home');
+  });
+}
+function hostPing(){ playBeep(); showToast('Ping • RTT '+(60+Math.floor(Math.random()*80))+' ms'); }
+
+/* ═══════════════════ CRYPTO DASHBOARD ═══════════════════ */
+function renderCrypto(){
+  const bEl=document.getElementById('crypto-block');
+  if(!bEl.getAttribute('data-init')){
+    bEl.innerText='#'+(820000+Math.floor(Math.random()*40000));
+    document.getElementById('crypto-latency').innerText=(28+Math.floor(Math.random()*40))+' ms';
+    document.getElementById('crypto-peers').innerText=(12+Math.floor(Math.random()*20))+' connected';
+    bEl.setAttribute('data-init','1');
+  }
+  document.getElementById('crypto-assets').innerHTML=cryptoAssets.map(a=>{
+    const cls=a.chg>0.02?'up':(a.chg<-0.02?'down':'flat');
+    const sign=a.chg>0?'+':'';
+    const price=a.price>=1000 ? '$'+a.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '$'+a.price.toFixed(4);
+    return `<div class="asset-row">
+      <div class="asset-sym">${a.sym}</div>
+      <div class="asset-info"><div class="asset-name">${a.name}</div><div class="asset-net">${a.net}</div></div>
+      <div class="asset-right"><div class="asset-price">${price}</div><div class="asset-chg ${cls}">${sign}${a.chg.toFixed(2)}%</div></div>
+    </div>`;
+  }).join('');
+}
+setInterval(()=>{
+  cryptoAssets.forEach(a=>{
+    a.price=Math.max(0.0001,a.price+(Math.random()-0.5)*(a.price*0.0016));
+    a.chg=Math.max(-15,Math.min(15,a.chg+(Math.random()-0.5)*0.35));
+  });
+  if(S.currentScreen==='screen-crypto')renderCrypto();
+},4000);
+function refreshCryptoNode(){ playBeep(); const bEl=document.getElementById('crypto-block'); bEl.removeAttribute('data-init'); renderCrypto(); showToast('Crypto node refreshed'); }
+
+/* ═══════════════════ SETTINGS ═══════════════════ */
+function renderSettings(){
+  document.getElementById('set-tid').innerText=S.terminal.tid;
+  document.getElementById('set-mid').innerText=S.terminal.mid;
+  document.getElementById('sw-beep').classList.toggle('on',S.settings.beep);
+  const swCin=document.getElementById('sw-cinematic');
+  if(swCin) swCin.classList.toggle('on',S.settings.cinematic);
+  document.getElementById('pill-default').innerText=S.forcedStatus;
+  document.getElementById('setting-count').innerText=history.length+' in memory';
+  const sb=document.getElementById('setting-balance');
+  if(sb) sb.innerText=S.balance!=null?fmtMoney(S.balance,'USD'):'Unlimited';
+}
+function toggleSetting(k){
+  S.settings[k]=!S.settings[k];
+  persist(); renderSettings();
+  showToast(k+' → '+(S.settings[k]?'ON':'OFF'));
+}
+function cycleDefaultResponse(){
+  const order=['APPROVED','DECLINED'];
+  const i=order.indexOf(S.forcedStatus);
+  S.forcedStatus=order[(i+1)%order.length];
+  persist(); renderSettings();
+  showToast('Next response: '+S.forcedStatus);
+}
+function editTid(){ editField('Terminal ID',S.terminal.tid, v=>{ S.terminal.tid=v; persist(); renderSettings(); showToast('Updated'); }); }
+function editMid(){ editField('Merchant ID',S.terminal.mid, v=>{ S.terminal.mid=v; persist(); renderSettings(); showToast('Updated'); }); }
+function askClearHistory(){
+  openConfirm('Clear History','Remove all stored transactions?', ()=>{
+    history=[];persist();refreshHome();renderSettings();showToast('History cleared');
+  });
+}
+function askFactoryReset(){
+  openConfirm('Factory Reset','Reset all settings and data?', ()=>{
+    S.settings={beep:true,cinematic:true};
+    S.forcedStatus='DECLINED'; S.batchNumber='000106'; S.balance=10000;
+    history=[];settlementLog=[];hostLog=[];S.securityAudit=[];
+    persist();
+    document.getElementById('selected-currency-label').innerText='USD';
+    refreshHome();renderSettings();
+    showToast('Terminal reset'); goTo('screen-home');
+  });
+}
+
+/* ═══════════════════ DIAGNOSTICS / SECURITY / SUPPORT ═══════════════════ */
+function runDiagnostics(){
+  playBeep();
+  const box=document.getElementById('diag-results');
+  const checks=['EMV Contact Kernel','Contactless Kernel','Magstripe Reader','Approval Code Pad','Secure Element','Host TLS Handshake','Printer Module','Battery / Power'];
+  box.innerHTML=checks.map((c,i)=>`
+    <div class="setting-row" style="padding:9px 11px;">
+      <div><div class="setting-title">${c}</div><div class="setting-sub" id="diag-${i}">Testing…</div></div>
+      <div style="font-size:11px;font-weight:900;color:#94a3b8;" id="diag-badge-${i}">•••</div>
+    </div>`).join('');
+  checks.forEach((c,i)=>{
+    setTimeout(()=>{
+      const sub=document.getElementById('diag-'+i); const badge=document.getElementById('diag-badge-'+i);
+      if(!sub)return;
+      const ok=Math.random()>0.1;
+      sub.innerText = ok ? 'Passed in '+(10+Math.floor(Math.random()*90))+' ms' : 'Retry recommended';
+      badge.innerText = ok ? 'PASS' : 'WARN';
+      badge.style.color = ok ? '#16a34a' : '#b45309';
+    },280+i*240);
+  });
+  showToast('Self-test running');
+}
+function renderSecurity(){
+  const el=document.getElementById('sec-audit');
+  if(!el)return;
+  if(!S.securityAudit.length){ el.innerHTML='<div class="empty-state" style="padding:18px 10px;">No security events yet.</div>'; return; }
+  el.innerHTML=S.securityAudit.slice(0,20).map(a=>`
+    <div class="setting-row" style="padding:9px 11px;">
+      <div><div class="setting-title" style="font-size:11px;">${a.action}</div>
+      <div class="setting-sub">${fmtFullDT(a.ts)}</div></div>
+      <div style="font-size:10px;color:var(--muted);font-weight:700;max-width:50%;text-align:right;">${a.detail}</div>
+    </div>`).join('');
+}
+function rotateKeys(){ playBeep(); pushSecAudit('DUKPT KEYS ROTATED','AES-128 new set'); showToast('Keys rotated'); }
+function renderSupportLog(){
+  const el=document.getElementById('support-log');
+  if(!el)return;
+  document.getElementById('host-log-count').innerText=hostLog.length+' EVENTS';
+  if(!hostLog.length){ el.innerHTML='<div style="color:#64748b;">No events.</div>'; return; }
+  el.innerHTML=hostLog.slice(0,80).map(l=>{
+    const color=l.kind==='REQ'?'#7dd3fc':l.kind==='RES'?'#86efac':'#fca5a5';
+    return `<div style="margin-bottom:2px;">[${fmtFullDT(l.ts).slice(-8)}] <span style="color:${color}">${l.kind} ${l.mti}</span> — ${l.summary}</div>`;
+  }).join('');
+}
+
+/* ═══════════════════ CONFIRM / INPUT ═══════════════════ */
+function openConfirm(title,msg,cb){
+  playBeep();
+  document.getElementById('confirm-title').innerText=title;
+  document.getElementById('confirm-msg').innerText=msg;
+  S.confirmCb=cb;
+  document.getElementById('sheet-backdrop').style.display='block';
+  document.getElementById('confirm-popup').classList.add('active');
+}
+function closeConfirm(){
+  document.getElementById('confirm-popup').classList.remove('active');
+  document.getElementById('sheet-backdrop').style.display='none';
+  S.confirmCb=null;
+}
+function runConfirm(){
+  const cb=S.confirmCb;
+  closeConfirm();
+  if(typeof cb==='function')cb();
+}
+function editField(title,initial,cb){
+  playBeep();
+  document.getElementById('input-title').innerText=title;
+  const inp=document.getElementById('input-value');
+  inp.value=initial;
+  S.inputCb=cb;
+  document.getElementById('sheet-backdrop').style.display='block';
+  document.getElementById('input-popup').classList.add('active');
+  setTimeout(()=>inp.focus(),100);
+}
+function closeInput(){
+  document.getElementById('input-popup').classList.remove('active');
+  document.getElementById('sheet-backdrop').style.display='none';
+  S.inputCb=null;
+}
+function saveInput(){
+  const v=document.getElementById('input-value').value.trim();
+  const cb=S.inputCb;
+  closeInput();
+  if(v&&typeof cb==='function')cb(v);
+}
+
+/* ═══════════════════ GLOBAL ═══════════════════ */
+document.addEventListener('click',function(e){
+  const kb=document.getElementById('custom-keyboard');
+  if(!kb.contains(e.target)&&!e.target.closest('.input-box,.amount-field')){
+    if(!e.target.closest('button,.sheet-item,.sheet,.tile,.chip,.switch,.pill-btn,.pin-key,.kb-btn,.outcome-option,.cg-select')){
+      hideKb();
+    }
+  }
+});
+
+/* ═══════════════════════════════════════════
+   FULLSCREEN + PWA BOOTSTRAP
+   ═══════════════════════════════════════════ */
+
+/* ── 1. PWA Manifest (inline blob — koi external file nahi chahiye) ── */
+(function(){
+  try {
+    const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#059669"/><stop offset="1" stop-color="#0369a1"/>
+      </linearGradient></defs>
+      <rect width="512" height="512" rx="96" fill="url(#g)"/>
+      <text x="256" y="330" font-family="Arial,Helvetica,sans-serif" font-size="220"
+        font-weight="900" fill="#fff" text-anchor="middle">J</text>
+    </svg>`;
+    const manifest = {
+      name: "JakarPOS Protocol Terminal",
+      short_name: "JakarPOS",
+      start_url: ".",
+      scope: ".",
+      display: "fullscreen",
+      orientation: "portrait",
+      background_color: "#0f172a",
+      theme_color: "#0f172a",
+      icons: [
+        {
+          src: "data:image/svg+xml;base64," + btoa(iconSvg),
+          sizes: "512x512",
+          type: "image/svg+xml",
+          purpose: "any maskable"
+        }
+      ]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'});
+    const url  = URL.createObjectURL(blob);
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = url;
+    document.head.appendChild(link);
+  } catch(e){}
+})();
+
+/* ── 2. Service Worker (inline blob — installable PWA ke liye zaroori) ── */
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  if(location.protocol === 'file:') return; /* file:// par SW support nahi */
+  const swCode = `
+    self.addEventListener('install', e => self.skipWaiting());
+    self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+    self.addEventListener('fetch', e => {
+      e.respondWith(
+        fetch(e.request).catch(() => caches.match(e.request))
+      );
+    });
+  `;
+  try {
+    const swBlob = new Blob([swCode], {type:'application/javascript'});
+    const swUrl  = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl, {scope: './'}).catch(()=>{});
+  } catch(e){}
+})();
+
+/* ── 3. Fullscreen — pehle tap par automatically ── */
+function requestAppFullscreen(){
+  const el = document.documentElement;
+  const fn = el.requestFullscreen || el.webkitRequestFullscreen ||
+             el.webkitRequestFullScreen || el.mozRequestFullScreen ||
+             el.msRequestFullscreen;
+  if(!fn) return;
+  try {
+    const p = fn.call(el, {navigationUI:'hide'});
+    if(p && p.then) p.then(()=>{
+      if(screen.orientation && screen.orientation.lock){
+        screen.orientation.lock('portrait').catch(()=>{});
+      }
+    }).catch(()=>{});
+  } catch(e){}
+}
+
+let _fsTried = false;
+function tryFullscreenOnce(){
+  if(_fsTried) return;
+  _fsTried = true;
+  requestAppFullscreen();
+}
+['touchstart','click','keydown'].forEach(ev =>
+  document.addEventListener(ev, tryFullscreenOnce, {once:true, passive:true})
+);
+
+/* Agar user fullscreen se bahar aata hai aur phir tap kare, dobara try karo */
+['touchstart','click'].forEach(ev =>
+  document.addEventListener(ev, ()=>{
+    const fsEl = document.fullscreenElement || document.webkitFullscreenElement ||
+                 document.mozFullScreenElement || document.msFullscreenElement;
+    if(!fsEl){
+      _fsTried = false;
+      tryFullscreenOnce();
+    }
+  }, {passive:true})
+);
+
+/* ── 4. Address bar auto-hide trick (Android Chrome) ── */
+setTimeout(()=>{ try{ window.scrollTo(0, 1); }catch(e){} }, 250);
+
+/* ── 5. Double-tap zoom & pull-to-refresh band karo ── */
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('dblclick', e => e.preventDefault(), {passive:false});
+try { document.body.style.overscrollBehavior = 'none'; } catch(e){}
+
+/* ═══════════════════ INIT ═══════════════════ */
+restore();
+if(!history.length){ history=[]; persist(); }
+S.isoLog=[];
+refreshHome();
+renderHistory();
+updateOutcomeOptions();
+pushHostLog('RES','0810','Terminal booted v21.0.1 PRO');
+pushSecAudit('TERMINAL BOOT','v21.0.1 PRO • SEALED');
+</script>
+</body>
+</html>
